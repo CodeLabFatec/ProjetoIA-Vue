@@ -1,10 +1,13 @@
 :root {
   --dark-blue: #003365;
-  --blue: #2665A2;
+  --blue: #004488;
   --black: #000;
   --gray: #333333;
-  --light-gray: #686868;
+  --light-gray: #515558;
+  --light-gray-100: #7A7F84;
   --white: #FFF;
+
+  --default-font: "Inter", sans-serif;
 }
 
 ul, li {
@@ -23,6 +26,7 @@ body {
   font-size: 16px;
   font-weight: 400;
   font-style: normal;
+  font-family: var(--default-font);
   background: var(--white);
   margin: 0;
 }
