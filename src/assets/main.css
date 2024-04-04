@@ -1,0 +1,28 @@
+:root {
+  --dark-blue: #003365;
+  --blue: #2665A2;
+  --black: #000;
+  --gray: #333333;
+  --light-gray: #686868;
+  --white: #FFF;
+}
+
+ul, li {
+  list-style: none;
+}
+
+button {
+  border: 0;
+  background-color: inherit;
+  font: inherit;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--preto);
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+  background: var(--white);
+  margin: 0;
+}
