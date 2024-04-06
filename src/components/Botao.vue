@@ -15,12 +15,17 @@ export default {
       type: String as PropType<"normal" | "large">,
       default: "normal"
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
   }
 }
 </script>
 
 <template>
   <button 
+    :disabled="disabled"
     :class="[
       'btn', 
       {
@@ -29,6 +34,9 @@ export default {
       },
       {
         large: size == 'large'
+      },
+      {
+        disabled
       }
     ]"
   >
@@ -39,11 +47,11 @@ export default {
 <style scoped>
 .btn {
   font-weight: bold;
-  color: var(--white);
   padding: 8px 12px;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.25s;
+  color: var(--white);
 }
 
 .primary {
@@ -55,6 +63,15 @@ export default {
   background-color: var(--blue);
 }
 
+.primary.disabled {
+  background-color: var(--gray-blue);
+  color: var(--light-gray-100);
+}
+
+.primary.disabled:hover {
+  background-color: var(--gray-blue);
+}
+
 .secondary {
   background-color: var(--light-gray);
   min-width: 120px;
@@ -63,8 +80,20 @@ export default {
 .secondary:hover {
   background-color: var(--light-gray-100);
 }
+.secondary.disabled {
+  background-color: var(--light-gray);
+  color: var(--light-gray-100);
+}
+
+.secondary.disabled:hover {
+  background-color: var(--light-gray);
+}
 
 .large {
   padding: 18px 12px;
+}
+
+.disabled {
+  cursor: default;
 }
 </style>
