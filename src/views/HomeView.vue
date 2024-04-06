@@ -7,10 +7,18 @@ import Titulo from '@/components/Titulo.vue';
 import Botao from '@/components/Botao.vue';
 import SeletorData from '@/components/SeletorData.vue';
 
+import Relatorio from '@/services/Relatorio';
+
 const selectedDate = ref<ISelectedDate>(null);
 
 const submit = () => {
-  console.log('submit')
+  Relatorio.getRelatorio(selectedDate.value)
+    .then(res => {
+      console.log('foi')
+    })
+    .catch(err => {
+      console.log(err)
+    })
 }
 
 const onChange = (date: ISelectedDate) => {
@@ -28,11 +36,7 @@ const reset = () => {
   <main class='main'>
     <Titulo content="Relatórios" />
     <div class="fields-container">
-      <SeletorData 
-        label="Selecione uma data"
-        :value="selectedDate"
-        @on-change="onChange($event)"
-      />
+      <SeletorData label="Selecione uma data" :value="selectedDate" @on-change="onChange($event)" />
     </div>
     <div class="btn-container">
       <Botao @click="submit()" class="btn" content="Download Relatório" />
