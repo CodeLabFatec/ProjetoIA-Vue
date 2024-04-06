@@ -1,6 +1,9 @@
+@import '@mdi/font/css/materialdesignicons.min.css';
+
 :root {
   --dark-blue: #003365;
   --blue: #004488;
+  --gray-blue: #304a64;
   --black: #000;
   --gray: #333333;
   --light-gray: #515558;
