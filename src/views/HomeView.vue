@@ -1,45 +1,35 @@
 <script setup lang="ts">
-import type { ISelectedDate } from '@/interfaces/ISelectedDate';
-
-import { ref } from 'vue';
-
 import Titulo from '@/components/Titulo.vue';
 import Botao from '@/components/Botao.vue';
-import SeletorData from '@/components/SeletorData.vue';
 
 import Relatorio from '@/services/Relatorio';
 
-const selectedDate = ref<ISelectedDate>(null);
-
-const submit = () => {
-  Relatorio.getRelatorio(selectedDate.value)
-    .then(res => {
-      console.log('foi')
-    })
-    .catch(err => {
-      console.log(err)
-    })
+const getRelatorio = (reportType: "7-days" | "14-days") => {
+  switch(reportType) {
+    case '7-days':
+      Relatorio.getRelatorio7Dias()
+      .then(res => {
+        console.log('foi')
+      })
+      .catch(err => console.log(err));
+      break;
+    case '14-days':
+      Relatorio.getRelatorio14Dias()
+      .then(res => {
+        console.log('foi')
+      })
+      .catch(err => console.log(err));
+      break;
+  }
 }
-
-const onChange = (date: ISelectedDate) => {
-  selectedDate.value = date;
-}
-
-
-const reset = () => {
-  selectedDate.value = null;
-}
-
 </script>
 
 <template>
   <main class='main'>
     <Titulo content="Relatórios" />
     <div class="fields-container">
-      <SeletorData label="Selecione uma data" :value="selectedDate" @on-change="onChange($event)" />
-    </div>
-    <div class="btn-container">
-      <Botao @click="submit()" class="btn" content="Download Relatório" />
+      <Botao @click="getRelatorio('7-days')" class="btn" content="Últimos 7 dias" />
+      <Botao @click="getRelatorio('14-days')" class="btn" content="Últimos 14 dias" />
     </div>
   </main>
 </template>
@@ -54,14 +44,6 @@ const reset = () => {
 .fields-container {
   display: flex;
   justify-content: center;
-}
-
-.btn-container {
-  display: flex;
-  justify-content: center;
-}
-
-.btn {
-  padding-inline: 52px;
+  gap: 12px
 }
 </style>

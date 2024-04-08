@@ -1,7 +1,22 @@
 import type { ISelectedDate } from "@/interfaces/ISelectedDate";
 import api from "./api";
 
+// /report-7-days
+// /report-14-days
+
 class Relatorio {
+  async getRelatorio7Dias() {
+    // const { data } = await api.get("/report-7-days");
+    // return data;
+    console.log('7 dias');
+  }
+  
+  async getRelatorio14Dias() {
+    // const { data } = await api.get("/report-14-days");
+    // return data;
+    console.log('14 dias');
+  }
+
   async getRelatorio(date: ISelectedDate) {
     if (date == null) {
       // se data não foi informado
