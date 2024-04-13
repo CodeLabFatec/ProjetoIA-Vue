@@ -1,0 +1,1 @@
+export type ISelectedDate = Date | Date[] | null;
