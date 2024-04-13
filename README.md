@@ -1,33 +1,41 @@
-# Projeto IA - Vue
+<br id="topo">
 
-This template should help get you started developing with Vue 3 in Vite.
+<h1 align="center">Projeto IA - Vue</h1>
 
-## Recommended IDE Setup
+> **Projeto Integrador 6º Semestre ADS - 2023**
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+<p align="center">
+    <a href="#objetivo">Informações</a> |
+    <a href="#tecnologias">Tecnologias</a>
+</p>
 
-## Type Support for `.vue` Imports in TS
+<span id="objetivo">
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## 🚀 Informações
 
-## Customize configuration
+> **Projeto em desenvolvimento**
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+Esse repositório contém o frontend desenvolvido para o Projeto IA (Projeto integrador do grupo Codelab da FATEC de São José dos Campos). As outras partes que compõe esse projeto podem ser encontrados no repostório pai [clicando aqui](https://github.com/CodeLabFatec/ProjetoIA).
 
-## Project Setup
+<br />
 
-```sh
-npm install
-```
+> Estratégia de branches e commits
 
-### Compile and Hot-Reload for Development
+As branches e commits desse projeto seguem o seguinte padrão estabelecido pelo [Conventional Commits](https://www.conventionalcommits.org/pt-br/v1.0.0/) e com exemplos de utilização detalhados [neste repositório](https://github.com/iuricode/padroes-de-commits).
 
-```sh
-npm run dev
-```
+<br>
 
-### Type-Check, Compile and Minify for Production
+<span id="tecnologias">
 
-```sh
-npm run build
-```
+## 🛠️ Tecnologias
+
+Foram usadas as seguintes ferramentas, linguagens e tecnologias para a execução do projeto:
+
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Vue](https://img.shields.io/badge/vuejs-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
+
+<br />
+
+→ [Voltar ao topo](#topo)
+
+<br>
