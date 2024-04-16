@@ -10,9 +10,9 @@ export default {
 </script>
 
 <template>
-  <h1 class="titulo">
+  <h2 class="titulo">
     {{ content }}
-  </h1>
+  </h2>
 </template>
 
 <style scoped>
