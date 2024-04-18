@@ -24,7 +24,7 @@ onMounted(() => {
       if (status == 200) {
         state.value.items = data.map(item => ({
           ...item,
-          data_cadastro: new Date(item.data_cadastro).toLocaleDateString('pt-BR'),
+          data: new Date(item.data).toLocaleDateString('pt-BR'),
         }));
       } else {
         state.value.error = true;
@@ -50,7 +50,7 @@ const headers = [
     title: 'RedZone',
   },
   {
-    key: 'data_cadastro',
+    key: 'data',
     title: 'Data de cadastro',
   },
 ]
