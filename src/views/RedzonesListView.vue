@@ -13,25 +13,29 @@ const state = ref({
   items: [] as IRedzone[],
   error: false,
   loading: false,
+  search: '',
 })
 
 onMounted(() => {
   state.value.loading = true;
   Redzone.getRedzones()
-  .then(res => {
-    const {status, data} = res;
-    if (status == 200) {
-      state.value.items = data;
-    } else {
+    .then(res => {
+      const { status, data } = res;
+      if (status == 200) {
+        state.value.items = data.map(item => ({
+          ...item,
+          data_cadastro: new Date(item.data_cadastro).toLocaleDateString('pt-BR'),
+        }));
+      } else {
+        state.value.error = true;
+      }
+      state.value.loading = false;
+    })
+    .catch(err => {
+      console.log(err);
+      state.value.loading = false;
       state.value.error = true;
-    }
-    state.value.loading = false;
-  })
-  .catch(err => {
-    console.log(err);
-    state.value.loading = false;
-    state.value.error = true;
-  })
+    })
 })
 
 const headers = [
@@ -80,10 +84,14 @@ const onSelect = (item: string, id: number) => {
     <Titulo content="RedZones" />
     <p v-if="state.error" class="redzoneslist-error">Um erro interno aconteceu. Tente novamente mais tarde.</p>
     <div class="redzoneslist-btncontainer">
-      <Botao content="Adicionar" @click="goToCreate()" class="redzoneslist-btn" />
+      <v-text-field  variant="underlined" class="redzoneslist-btncontainer-searchinput"
+        v-model="state.search" prepend-inner-icon="mdi-magnify"></v-text-field>
+      <div>
+        <Botao content="Adicionar" @click="goToCreate()" class="redzoneslist-btn" />
+      </div>
     </div>
     <div class="redzoneslist-tablecontainer">
-      <v-data-table :headers="headers" :items="state.items" :loading="state.loading">
+      <v-data-table :headers="headers" :items="state.items" :loading="state.loading" :search="state.search">
         <template v-slot:item.id="{ item }">
           <OpcoesBtn :items="['Editar', 'Excluir']" @on-select="onSelect($event, item.id)" />
         </template>
@@ -95,13 +103,21 @@ const onSelect = (item: string, id: number) => {
 <style>
 .redzoneslist-btncontainer {
   display: flex;
-  flex-direction: row-reverse;
   width: 90%;
-  margin: auto;
+  margin: 12px auto;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: -18px;
+}
+
+.redzoneslist-btncontainer-searchinput {
+  flex: 1;
+  padding: 0;
 }
 
 .redzoneslist-btn {
   width: 200px;
+  margin-top: 12px;
 }
 
 .redzoneslist-tablecontainer {

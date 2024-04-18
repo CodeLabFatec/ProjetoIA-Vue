@@ -6,28 +6,28 @@ class Redzone {
 
     const list: IRedzone[] = [
       {
-        data_cadastro: new Date().toUTCString(),
-        descricao: "teste",
+        data_cadastro: new Date(2002).toUTCString(),
+        descricao: "teste 1",
         id: 1,
-        nome: "teste",
+        nome: "teste 1",
       },
       {
         data_cadastro: new Date().toUTCString(),
         descricao: "teste",
         id: 2,
-        nome: "teste",
+        nome: "teste 2",
       },
       {
         data_cadastro: new Date().toUTCString(),
         descricao: "teste",
         id: 3,
-        nome: "teste",
+        nome: "teste 3",
       },
       {
         data_cadastro: new Date().toUTCString(),
         descricao: "teste",
         id: 4,
-        nome: "teste",
+        nome: "teste 4",
       },
     ];
 
