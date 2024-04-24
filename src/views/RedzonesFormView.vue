@@ -1,0 +1,128 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+import Titulo from '@/components/Titulo.vue';
+import Botao from '@/components/Botao.vue';
+
+import Redzone from '@/services/Redzone';
+
+const router = useRouter();
+
+const state = ref({
+  nome: '',
+  descricao: '',
+  loading: false,
+  error: false,
+  success: false,
+  invalid: false,
+});
+
+const onSubmit = () => {
+  if (!state.value.nome) {
+    state.value.invalid = true;
+    return
+  }
+  
+  state.value.loading = true;
+  Redzone.create({
+    nome: state.value.nome,
+    descricao: state.value.descricao
+  })
+  .then(res => {
+    
+    if (res.status !== 201 && res.status !== 200) {
+      state.value.error = true;
+    } else {
+      state.value.success = true;
+      setTimeout(() => {
+        reset();
+        goBack();
+      }, 3250);
+    }
+
+    state.value.loading = false;
+  })
+  .catch( err => {
+    console.log(err);
+    state.value.error = true;
+    state.value.loading = false;
+  })
+}
+
+const reset = () => {
+  state.value = {
+    invalid: false,
+    descricao: '',
+    error: false,
+    loading: false,
+    nome: '',
+    success: false,
+  }
+}
+
+const goBack = () => {
+  router.back();
+}
+
+const clearError = () => {
+  state.value.invalid = false;
+}
+</script>
+
+<template>
+  <main class="redzonesform">
+    <v-progress-linear v-if="state.loading" indeterminate color="#004488"></v-progress-linear>
+    <div class="redzonesform-titulo-container">
+      <v-btn @click="goBack" variant="text" icon="mdi-arrow-left" color="#004488"></v-btn>
+      <Titulo content="Cadastro de RedZone" />
+    </div>
+    <form @submit.prevent="onSubmit" class="form">
+      <div>
+        <v-text-field @update:focused="clearError" :error-messages="state.invalid ? 'Campo obrigatório' : ''" :readonly="state.loading"variant="outlined" label="Nome*" v-model="state.nome"></v-text-field>
+      </div>
+      <div>
+        <v-textarea :readonly="state.loading"class="desc-field" variant="outlined" label="Descrição" v-model="state.descricao"
+          auto-grow></v-textarea>
+      </div>
+      <div class="redzonesform-containerbtn">
+        <Botao :disabled="state.loading" content="Cadastrar" />
+      </div>
+    </form>
+  </main>
+  <v-snackbar color="green"v-model="state.success">
+    Redzone criada com sucesso! Retornando à tela de listagem...
+  </v-snackbar>
+  <v-snackbar color="red"v-model="state.error">
+    Um erro interno aconteceu. Tente novamente mais tarde.
+  </v-snackbar>
+</template>
+
+<style scoped>
+.redzonesform {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.redzonesform-titulo-container {
+  display: flex;
+  width: 100%;
+}
+
+.redzonesform .form {
+  display: flex;
+  flex-direction: column;
+  margin-inline: 12px;
+  width: 80%;
+  max-width: 520px;
+  gap: 12px;
+}
+
+.redzonesform-containerbtn {
+  display: flex;
+  flex-direction: row-reverse;
+}
+</style>

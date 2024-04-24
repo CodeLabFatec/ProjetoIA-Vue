@@ -12,6 +12,19 @@ class Redzone {
       return { data: [], status: 500 };
     }
   }
+
+  async create(redzone: {
+    nome: string;
+    descricao: string;
+  }): Promise<{ status: number }> {
+    try {
+      const { status } = await api.post("/redzone", redzone);
+      return { status };
+    } catch (err) {
+      console.log(err);
+      return { status: 500 };
+    }
+  }
 }
 
 export default new Redzone();

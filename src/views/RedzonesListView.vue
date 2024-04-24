@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 import Titulo from '@/components/Titulo.vue';
 import Botao from '@/components/Botao.vue';
@@ -8,6 +9,8 @@ import OpcoesBtn from '@/components/OpcoesBtn.vue';
 import Redzone from '@/services/Redzone';
 
 import type IRedzone from '@/interfaces/IRedzone';
+
+const router = useRouter();
 
 const state = ref({
   items: [] as IRedzone[],
@@ -64,7 +67,7 @@ const goToUpdate = (id: number) => {
 }
 
 const goToCreate = () => {
-  console.log('create');
+  router.push('/redzones/create');
 }
 
 const onSelect = (item: string, id: number) => {
@@ -100,7 +103,7 @@ const onSelect = (item: string, id: number) => {
   </main>
 </template>
 
-<style>
+<style scoped>
 .redzoneslist-btncontainer {
   display: flex;
   width: 90%;
