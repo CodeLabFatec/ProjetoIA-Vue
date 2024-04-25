@@ -5,11 +5,22 @@ class Redzone {
   async getRedzones(): Promise<{ data: IRedzone[]; status: number }> {
     try {
       const { data, status } = await api.get("/redzone");
-
       return { data: status == 200 ? data : [], status };
     } catch (err) {
       console.log(err);
       return { data: [], status: 500 };
+    }
+  }
+
+  async getRedzonesByID(
+    id: number
+  ): Promise<{ data?: IRedzone; status: number }> {
+    try {
+      const { data, status } = await api.get(`/redzone/${id}`);
+      return { data, status };
+    } catch (err) {
+      console.log(err);
+      return { status: 500 };
     }
   }
 
@@ -19,6 +30,20 @@ class Redzone {
   }): Promise<{ status: number }> {
     try {
       const { status } = await api.post("/redzone", redzone);
+      return { status };
+    } catch (err) {
+      console.log(err);
+      return { status: 500 };
+    }
+  }
+
+  async update(redzone: {
+    id: number;
+    nome: string;
+    descricao: string;
+  }): Promise<{ status: number }> {
+    try {
+      const { status } = await api.put(`/redzone/${redzone.id}`, redzone);
       return { status };
     } catch (err) {
       console.log(err);

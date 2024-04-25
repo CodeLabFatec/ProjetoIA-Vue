@@ -63,7 +63,7 @@ const deleteItem = (id: number) => {
 }
 
 const goToUpdate = (id: number) => {
-  console.log('update', id);
+  router.push(`/redzones/update/${id}`);
 }
 
 const goToCreate = () => {

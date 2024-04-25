@@ -21,6 +21,11 @@ const router = createRouter({
       name: 'create redzone',
       component: RedzonesFormView
     },
+    {
+      path: '/redzones/update/:id',
+      name: 'update redzone',
+      component: RedzonesFormView
+    },
   ]
 })
 
