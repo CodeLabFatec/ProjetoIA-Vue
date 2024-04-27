@@ -8,7 +8,7 @@ export default {
       required: true,
     },
     color: {
-      type: String as PropType<"primary" | "secondary">,
+      type: String as PropType<"primary" | "secondary" | "alert">,
       default: "primary"
     },
     size: {
@@ -30,7 +30,8 @@ export default {
       'btn', 
       {
         primary: color == 'primary', 
-        secondary: color == 'secondary'
+        secondary: color == 'secondary',
+        alert: color == 'alert'
       },
       {
         large: size == 'large'
@@ -70,6 +71,24 @@ export default {
 
 .primary.disabled:hover {
   background-color: var(--gray-blue);
+}
+
+.alert {
+  background-color: var(--red);
+  min-width: 120px;
+}
+
+.alert:hover {
+  background-color: var(--light-red);
+}
+
+.alert.disabled {
+  background-color: var(--red-gray);
+  color: rgb(219, 219, 219)
+}
+
+.alert.disabled:hover {
+  background-color: var(--red-gray);
 }
 
 .secondary {
