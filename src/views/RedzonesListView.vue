@@ -6,6 +6,7 @@ import Titulo from '@/components/Titulo.vue';
 import Botao from '@/components/Botao.vue';
 import OpcoesBtn from '@/components/OpcoesBtn.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
+import RedzoneModal from '@/components/RedzoneModal.vue';
 
 import Redzone from '@/services/Redzone';
 
@@ -22,6 +23,7 @@ const state = ref({
   selectedRedzone: undefined as IRedzone | undefined,
   deleteFailed: false,
   deleteSuccess: false,
+  redzoneModal: false,
 });
 
 const getRedzones = () => {
@@ -68,19 +70,24 @@ const headers = [
   },
 ];
 
-const updateModal = (new_state: boolean) => {
+const updateDeleteModal = (new_state: boolean) => {
   state.value.deleteModal = new_state;
 }
 
-const askDeleteItem = (item: IRedzone) => {
+const updateRedzoneModal = (new_state: boolean) => {
+  state.value.redzoneModal = new_state;
+}
+
+const askDeleteItem = (item: IRedzone | undefined) => {
   state.value.selectedRedzone = item;
-  updateModal(true);
+  updateDeleteModal(true);
 }
 
 const confirmDeleteItem = () => {
   if (state.value.selectedRedzone) {
+    state.value.redzoneModal = false;
     state.value.loading = true;
-    updateModal(false);
+    updateDeleteModal(false);
     Redzone.delete(state.value.selectedRedzone.id)
       .then(res => {
         if (res.status == 200) {
@@ -100,8 +107,8 @@ const confirmDeleteItem = () => {
   }
 }
 
-const goToUpdate = (id: number) => {
-  router.push(`/redzones/update/${id}`);
+const goToUpdate = (id: number | undefined) => {
+  router.push(`/redzones/update/${id || ''}`);
 }
 
 const goToCreate = () => {
@@ -110,6 +117,10 @@ const goToCreate = () => {
 
 const onSelect = (option: string, item: IRedzone) => {
   switch (option) {
+    case 'Detalhes':
+      state.value.redzoneModal = true;
+      state.value.selectedRedzone = item;
+      break;
     case 'Editar':
       goToUpdate(item.id);
       break;
@@ -134,14 +145,29 @@ const onSelect = (option: string, item: IRedzone) => {
     <div class="redzoneslist-tablecontainer">
       <v-data-table :headers="headers" :items="state.items" :loading="state.loading" :search="state.search">
         <template v-slot:item.id="{ item }">
-          <OpcoesBtn :items="['Editar', 'Excluir']" @on-select="onSelect($event, item)" />
+          <OpcoesBtn :items="['Detalhes', 'Editar', 'Excluir']" @on-select="onSelect($event, item)" />
         </template>
       </v-data-table>
     </div>
   </main>
-  <ConfirmModal title="Confirmar exclusão?" msg_cancel="cancelar" msg_confirm="confirmar" :visible="state.deleteModal"
-    :message="`Excluir redzone ${state.selectedRedzone?.nome}?`" @on-update-modal="updateModal($event)"
-    @on-confirm="confirmDeleteItem()" />
+
+  <ConfirmModal 
+    title="Confirmar exclusão?" 
+    msg_cancel="cancelar" 
+    msg_confirm="confirmar" 
+    :visible="state.deleteModal"
+    :message="`Excluir redzone ${state.selectedRedzone?.nome}?`" 
+    @on-update-modal="updateDeleteModal($event)"
+    @on-confirm="confirmDeleteItem()" 
+  />
+  <RedzoneModal 
+    :redzone="state.selectedRedzone" 
+    :visible="state.redzoneModal"
+    @on-update-modal="updateRedzoneModal($event)" 
+    @on-delete-request="askDeleteItem(state.selectedRedzone)"
+    @on-update-request="goToUpdate(state.selectedRedzone?.id)"
+  />
+
   <v-snackbar color="red" v-model="state.deleteFailed">
     Não foi possível deletar a redzone. Tente novamente mais tarde.
   </v-snackbar>
