@@ -9,6 +9,19 @@ class Redzone {
     } catch (err) {
       console.log(err);
       return { data: [], status: 500 };
+
+      // uncomment just for tests
+      // return {
+      //   data: [
+      //     {
+      //       data: new Date().toISOString(),
+      //       descricao: "lorem ipsum",
+      //       id: 1,
+      //       nome: "nome redzone",
+      //     },
+      //   ],
+      //   status: 200,
+      // };
     }
   }
 
@@ -44,6 +57,16 @@ class Redzone {
   }): Promise<{ status: number }> {
     try {
       const { status } = await api.put(`/redzone/${redzone.id}`, redzone);
+      return { status };
+    } catch (err) {
+      console.log(err);
+      return { status: 500 };
+    }
+  }
+
+  async delete(id: number): Promise<{ status: number }> {
+    try {
+      const { status } = await api.delete(`/redzone/${id}`);
       return { status };
     } catch (err) {
       console.log(err);
