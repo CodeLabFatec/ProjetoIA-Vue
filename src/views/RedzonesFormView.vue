@@ -95,9 +95,13 @@ const clearError = () => {
 
 <template>
   <main class="redzonesform">
-    <v-progress-linear v-if="state.loading" indeterminate color="#004488"></v-progress-linear>
+    <div class="redzonesform-progressbar">
+      <v-progress-linear v-if="state.loading" indeterminate color="#004488"></v-progress-linear>
+  </div>
     <div class="redzonesform-titulo-container">
-      <v-btn @click="goBack" variant="text" icon="mdi-arrow-left" color="#004488"></v-btn>
+      <div class="redzonesform-backbtn">
+        <v-btn @click="goBack" variant="text" icon="mdi-arrow-left" color="#004488"></v-btn>
+      </div>
       <Titulo :content="route_data.params.id ? 'Edição de Redzone' : 'Cadastro de RedZone'" />
     </div>
     <form @submit.prevent="onSubmit" class="form">
@@ -123,6 +127,19 @@ const clearError = () => {
 </template>
 
 <style scoped>
+.redzonesform-backbtn {
+  position: absolute;
+  top: 74px;
+  left: 0;
+}
+
+.redzonesform-progressbar {
+  position: absolute;
+  width: 100%;
+  top: 74px;
+  left: 0;
+}
+
 .redzonesform {
   display: flex;
   flex-direction: column;
