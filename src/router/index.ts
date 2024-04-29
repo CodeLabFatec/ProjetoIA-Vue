@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import HomeView from '@/views/HomeView.vue'
 import RedzonesListView from '@/views/RedzonesListView.vue'
+import RedzonesFormView from '@/views/RedzonesFormView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,7 +14,17 @@ const router = createRouter({
     {
       path: '/redzones',
       name: 'redzones',
-      component: RedzonesListView
+      component: RedzonesListView,
+    },
+    {
+      path: '/redzones/create',
+      name: 'create redzone',
+      component: RedzonesFormView
+    },
+    {
+      path: '/redzones/update/:id',
+      name: 'update redzone',
+      component: RedzonesFormView
     },
   ]
 })
