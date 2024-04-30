@@ -8,9 +8,16 @@ import Indicador from '@/components/Indicador.vue';
 import Dashboard from '@/services/Dashboard';
 
 import type IDashboardResponse from "@/interfaces/IDashboardResponse";
+import type IRedzone from '@/interfaces/IRedzone';
+import Redzone from '@/services/Redzone';
+import LoadingBar from '@/components/LoadingBar.vue';
 
 const state = ref({
-  graphic_data: {} as IDashboardResponse
+  graphic_data: {} as IDashboardResponse,
+  redzones: [] as IRedzone[],
+  selectedRedzone: '',
+  loading: false,
+  error: false,
 });
 
 const headers = [
@@ -28,25 +35,66 @@ const headers = [
   },
 ]
 
-onMounted(() => {
-  Dashboard.getDashboard()
-    .then(res => {
-      if (res.data) {
-        state.value.graphic_data = res.data
-      }
+const getDashboard = () => {
+  state.value.loading = true;
+  Dashboard.getDashboard(state.value.selectedRedzone ? Number(state.value.selectedRedzone.split('-')[0]) : undefined)
+  .then(res => {
+    if (res.data && res.status == 200) {
+      state.value.graphic_data = res.data
+    } else {
+      state.value.error = true;
       console.log(res);
-    })
-    .catch(err => {
-      console.log(err);
-    })
+    }
+    state.value.loading = false;
+  })
+  .catch(err => {
+    console.log(err);
+    state.value.error = true;
+    state.value.loading = false;
+  })
+}
+
+onMounted(() => {
+  getDashboard();
+
+  state.value.loading = true;
+  Redzone.getRedzones()
+  .then(res => {
+    if (res.status == 200) {
+      state.value.redzones = res.data;
+    } else {
+      state.value.error = true;
+      console.log(res);
+    }
+    state.value.loading = false;
+  })
+  .catch(err => {
+    console.log(err);
+    state.value.error = true;
+    state.value.loading = false;
+  });
 });
 
 </script>
 
 <template>
+  <LoadingBar :visible="state.loading" />
+  <v-snackbar color="red" v-model="state.error">
+    Um erro interno aconteceu. Tente novamente mais tarde.
+  </v-snackbar>
   <main class="dashboard-main">
     <Titulo content="Dashboard" />
     <div class="dashboard-content">
+      <div class="dashboard-filters">
+        <v-combobox
+          clearable
+          label="Redzone"
+          variant="underlined"
+          :items="state.redzones.map(redzone => `${redzone.id} - ${redzone.nome}`)"
+          v-model="state.selectedRedzone"
+          @update:model-value="getDashboard"
+        ></v-combobox>
+      </div>
       <div class="dashboard-content-row">
         <div class="dashboard-graphic">
           <h1 class="dashboard-title">
@@ -58,8 +106,8 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Indicadores
           </h1>
-          <Indicador title="Número total de pessoas em redzone" subtitle="Neste momento" :value="`${state.graphic_data?.indicadores?.total_pessoas}`" />
-          <Indicador title="Número total de entradas" subtitle="Desde o início" :value="`${state.graphic_data?.indicadores?.total_entradas}`" />
+          <Indicador title="Número total de pessoas em redzone" subtitle="Neste momento" :value="`${state.graphic_data?.indicadores?.total_pessoas || '-'}`" />
+          <Indicador title="Número total de entradas" subtitle="Desde o início" :value="`${state.graphic_data?.indicadores?.total_entradas || '-'}`" />
         </div>
       </div>
       <div class="dashboard-content-row">
@@ -69,9 +117,7 @@ onMounted(() => {
           </h1>
           <v-data-table :headers="headers" :items="state.graphic_data?.tabela">
             <template v-slot:item.data="{ item }">
-              
-                {{ new Date(item.data).toLocaleDateString('pt-BR') }}
-              
+              {{ new Date(item.data).toLocaleDateString('pt-BR') }}              
             </template>
             <template v-slot:item.tipo="{ item }">
               {{ item.tipo == 'entrada' ? 'Entrada' : 'Saída' }}
@@ -96,7 +142,10 @@ onMounted(() => {
   display: flex;
   flex-direction: row;
   gap: 24px;
-  /* border: 1px solid red; */
+}
+
+.dashboard-filters {
+  width: 240px;
 }
 
 .dashboard-graphic, .dashboard-table {

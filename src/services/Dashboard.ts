@@ -1,11 +1,12 @@
 import type IDashboardResponse from "@/interfaces/IDashboardResponse";
 import api from "./api";
 
-class Relatorio {
-  async getDashboard(): Promise<{ status: number; data?: IDashboardResponse }> {
+class Dashboard {
+  async getDashboard(id_redzone?: number): Promise<{ status: number; data?: IDashboardResponse }> {
     try {
       // const resp = await api.get('/dashboard');
 
+      console.log('getting')
       const data: IDashboardResponse = {
         grafico: [
           {
@@ -63,4 +64,4 @@ class Relatorio {
   }
 }
 
-export default new Relatorio();
+export default new Dashboard();
