@@ -60,4 +60,17 @@ export default {
     name: 'Pessoas',
     data: $props.graphic_data?.map(item => item.valor)
   }]"></apexchart>
+  <div v-else class="grafico-vazio">
+    Erro ao carregar dados
+  </div>
 </template>
+
+<style scoped>
+.grafico-vazio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 350px;
+  color: var(--light-gray);
+}
+</style>
