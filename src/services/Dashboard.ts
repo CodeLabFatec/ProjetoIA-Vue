@@ -15,25 +15,25 @@ class Dashboard {
   };
 
   private filterRegisterByDate = (list: IRegistroResponse[], date: string) => {
-    return list.filter(item => {
-      const item_date = new Date(item.data).toISOString().split('T')[0];
+    return list.filter((item) => {
+      const item_date = new Date(item.data).toISOString().split("T")[0];
       return item_date === date;
     });
-  }
+  };
 
   private convertRegistersInGraphicData = (list: IRegistroResponse[]) => {
     let last_7days_list: string[] = [];
-  
+
     for (let i = 0; i < 7; i++) {
       let data = new Date();
       data.setDate(data.getDate() - i);
       let dataString = data.toISOString().split("T")[0];
       last_7days_list.push(dataString);
     }
-  
-    const register_groupedby_date = last_7days_list.map(date => ({
+
+    const register_groupedby_date = last_7days_list.map((date) => ({
       data: date,
-      valor: this.filterRegisterByDate(list, date).length
+      valor: this.filterRegisterByDate(list, date).length,
     }));
 
     return register_groupedby_date;
@@ -43,24 +43,15 @@ class Dashboard {
     id_redzone?: number
   ): Promise<{ status: number; data?: IDashboardResponse }> {
     try {
-      const total_entradas = await RegistroEntradasSaidas.getRegistroLength(
-        "entrada",
-        id_redzone
-      );
-
-      const total_saidas = await RegistroEntradasSaidas.getRegistroLength(
-        "saida",
-        id_redzone
-      );
-
-      const entradas = await RegistroEntradasSaidas.getRegistros(
-        "entrada",
-        id_redzone
-      );
-
-      const saidas = await RegistroEntradasSaidas.getRegistros(
-        "saida",
-        id_redzone
+      const [total_entradas, total_saidas, entradas, saidas] = (
+        await Promise.allSettled([
+          RegistroEntradasSaidas.getRegistroLength("entrada", id_redzone),
+          RegistroEntradasSaidas.getRegistroLength("saida", id_redzone),
+          RegistroEntradasSaidas.getRegistros("entrada", id_redzone),
+          RegistroEntradasSaidas.getRegistros("saida", id_redzone),
+        ])
+      ).map((result) =>
+        result.status === "fulfilled" ? result.value : { status: 500 }
       );
 
       if (
@@ -74,10 +65,13 @@ class Dashboard {
         saidas.status == 200
       ) {
         const merged_entradas_saidas = this.convertRegisterArray(
-          entradas.data,
+          entradas.data as IRegistroResponse[],
           "entrada"
         )
-          .concat(this.convertRegisterArray(saidas.data, "saida"))
+          .concat(this.convertRegisterArray(
+            saidas.data as IRegistroResponse[], 
+            "saida"
+          ))
           .sort((a, b) => {
             let data_a = new Date(a.data);
             let data_b = new Date(b.data);
@@ -86,11 +80,11 @@ class Dashboard {
           });
 
         const info_dashboard: IDashboardResponse = {
-          grafico: this.convertRegistersInGraphicData(entradas.data),
+          grafico: this.convertRegistersInGraphicData(entradas.data as IRegistroResponse[]),
           tabela: merged_entradas_saidas,
           indicadores: {
-            total_pessoas: total_entradas.data - total_saidas.data,
-            total_entradas: total_entradas.data,
+            total_pessoas: (total_entradas.data as number) - (total_saidas.data as number),
+            total_entradas: (total_entradas.data as number),
           },
         };
 
