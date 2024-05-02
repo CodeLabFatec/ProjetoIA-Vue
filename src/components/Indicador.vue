@@ -18,16 +18,16 @@ export default {
 </script>
 
 <template>
-  <div class="indicador-container">
+  <div :class="['indicador-container', $props.class]">
     <h3 class="indicador-title">
       {{ $props.title }}
     </h3>
-    <h4 v-if="$props.subtitle" class="indicador-subtitle">
-      {{ $props.subtitle }}
-    </h4>
     <span class="indicador-value">
       {{ $props.value }}
     </span>
+    <h4 v-if="$props.subtitle" class="indicador-subtitle">
+      {{ $props.subtitle }}
+    </h4>
   </div>
 </template>
 
@@ -37,24 +37,31 @@ export default {
   border-radius: 12px;
   padding: 14px;
   color: white;
-  width: 220px;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .indicador-container h3, .indicador-container h4 {
   padding: 0;
   margin: 0;
+  text-align: center;
 }
 
 .indicador-container h3 {
   line-height: 18px;
+  font-size: 18px;
 }
 
 .indicador-container h4 {
   font-weight: normal;
+  font-size: 14px;
 }
 
 .indicador-value {
   font-weight: bold;
-  font-size: 36px;
+  font-size: 28px;
 }
 </style>

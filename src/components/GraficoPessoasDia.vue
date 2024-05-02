@@ -21,7 +21,6 @@ export default {
       chartOptions: {
         chart: {
           type: 'bar',
-          height: 350,
         },
         plotOptions: {
           bar: {
@@ -53,7 +52,7 @@ export default {
 </script>
 
 <template>
-  <apexchart v-if="$props.graphic_data" type="bar" height="350" :options="{
+  <apexchart v-if="$props.graphic_data" type="bar" height="320" :options="{
     ...chartOptions,
     xaxis: {
       ...chartOptions.xaxis,
