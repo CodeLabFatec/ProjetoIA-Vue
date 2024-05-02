@@ -22,6 +22,7 @@ const state = ref({
   errorExport: false,
   successExport: false,
   loadingExportTable: false,
+  loadingExportGraphic: false,
 });
 
 const headers = [
@@ -42,38 +43,41 @@ const headers = [
 const getDashboard = () => {
   state.value.loading = true;
   Dashboard.getDashboard(state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined)
-  .then(res => {
-    if (res.data && res.status == 200) {
-      state.value.graphic_data = res.data
-    } else {
+    .then(res => {
+      if (res.data && res.status == 200) {
+        state.value.graphic_data = res.data
+      } else {
+        state.value.error = true;
+        console.log(res);
+      }
+      state.value.loading = false;
+    })
+    .catch(err => {
+      console.log(err);
       state.value.error = true;
-      console.log(res);
-    }
-    state.value.loading = false;
-  })
-  .catch(err => {
-    console.log(err);
-    state.value.error = true;
-    state.value.loading = false;
-  });
+      state.value.loading = false;
+    });
 }
 
-const exportTable = () => {
-  state.value.loadingExportTable = true;
-  Relatorio.getRelatorio('all')
-  .then(res => {
-    if (res.status !== 200) {
+const exportContent = (source: 'table' | 'graphic') => {
+  if (source == 'table') state.value.loadingExportTable = true;
+  if (source == 'graphic') state.value.loadingExportGraphic = true;
+  Relatorio.getRelatorio(source == 'table' ? 'all' : '7-days')
+    .then(res => {
+      if (res.status !== 200) {
+        state.value.errorExport = true;
+      } else {
+        state.value.successExport = true;
+      }
+      if (source == 'table') state.value.loadingExportTable = false;
+      if (source == 'graphic') state.value.loadingExportGraphic = false;
+    })
+    .catch(err => {
+      console.log(err);
       state.value.errorExport = true;
-    } else {
-      state.value.successExport = true;
-    }
-    state.value.loadingExportTable = false;
-  })
-  .catch(err => {
-    console.log(err);
-    state.value.errorExport = true;
-    state.value.loadingExportTable = false;
-  });
+      if (source == 'table') state.value.loadingExportTable = false;
+      if (source == 'graphic') state.value.loadingExportGraphic = false;
+    });
 }
 
 onMounted(() => {
@@ -81,20 +85,20 @@ onMounted(() => {
 
   state.value.loading = true;
   Redzone.getRedzones()
-  .then(res => {
-    if (res.status == 200) {
-      state.value.redzones = res.data;
-    } else {
+    .then(res => {
+      if (res.status == 200) {
+        state.value.redzones = res.data;
+      } else {
+        state.value.error = true;
+        console.log(res);
+      }
+      state.value.loading = false;
+    })
+    .catch(err => {
+      console.log(err);
       state.value.error = true;
-      console.log(res);
-    }
-    state.value.loading = false;
-  })
-  .catch(err => {
-    console.log(err);
-    state.value.error = true;
-    state.value.loading = false;
-  });
+      state.value.loading = false;
+    });
 });
 
 </script>
@@ -114,19 +118,20 @@ onMounted(() => {
     <Titulo style="margin: 12px auto;" content="Dashboard" />
     <div class="dashboard-content">
       <div class="dashboard-filters">
-        <v-select
-          label="Redzone"
-          variant="underlined"
-          :items="[
-            'Todos',
-            ...state.redzones.map(redzone => `${redzone.id} - ${redzone.nome}`)
-          ]"
-          v-model="state.selectedRedzone"
-          @update:model-value="getDashboard"
-        ></v-select>
+        <v-select label="Redzone" variant="underlined" :items="[
+    'Todos',
+    ...state.redzones.map(redzone => `${redzone.id} - ${redzone.nome}`)
+  ]" v-model="state.selectedRedzone" @update:model-value="getDashboard"></v-select>
       </div>
       <div class="dashboard-content-row">
         <div class="dashboard-graphic">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ props }">
+              <v-btn class="dashboard-download-btn" icon="mdi-download" variant="text" color="#004488" v-bind="props"
+                :loading="state.loadingExportGraphic" @click="exportContent('graphic')"></v-btn>
+            </template>
+            <span>Baixar relatório últimos 7 dias</span>
+          </v-tooltip>
           <h1 class="dashboard-title">
             Quantidade de pessoas por dia (últimos 7 dias)
           </h1>
@@ -136,14 +141,12 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Indicadores
           </h1>
-          <Indicador class="dashboard-indicator" title="Pessoas em redzone" subtitle="Neste momento" :value="`${
-            state.graphic_data?.indicadores?.total_pessoas !== undefined ? 
-            state.graphic_data?.indicadores?.total_pessoas
-             : '-'}`" />
-          <Indicador class="dashboard-indicator" title="Total de entradas" subtitle="Desde o início" :value="`${
-            state.graphic_data?.indicadores?.total_entradas !== undefined ? 
-            state.graphic_data?.indicadores?.total_entradas
-            : '-'}`" />
+          <Indicador class="dashboard-indicator" title="Pessoas em redzone" subtitle="Neste momento" :value="`${state.graphic_data?.indicadores?.total_pessoas !== undefined ?
+    state.graphic_data?.indicadores?.total_pessoas
+    : '-'}`" />
+          <Indicador class="dashboard-indicator" title="Total de entradas" subtitle="Desde o início" :value="`${state.graphic_data?.indicadores?.total_entradas !== undefined ?
+    state.graphic_data?.indicadores?.total_entradas
+    : '-'}`" />
         </div>
       </div>
       <hr style="width: 95%; margin: auto; opacity: 30%;" />
@@ -151,7 +154,8 @@ onMounted(() => {
         <div class="dashboard-table">
           <v-tooltip bottom>
             <template v-slot:activator="{ props }">
-              <v-btn class="dashboard-download-btn" icon="mdi-download" variant="text" color="#004488" v-bind="props" :loading="state.loadingExportTable" @click="exportTable"></v-btn>
+              <v-btn class="dashboard-download-btn" icon="mdi-download" variant="text" color="#004488" v-bind="props"
+                :loading="state.loadingExportTable" @click="exportContent('table')"></v-btn>
             </template>
             <span>Baixar tabela em XLSX</span>
           </v-tooltip>
@@ -160,7 +164,7 @@ onMounted(() => {
           </h1>
           <v-data-table :headers="headers" :items="state.graphic_data?.tabela">
             <template v-slot:item.data="{ item }">
-              {{ new Date(item.data).toLocaleDateString('pt-BR') }}              
+              {{ new Date(item.data).toLocaleDateString('pt-BR') }}
             </template>
             <template v-slot:item.tipo="{ item }">
               {{ item.tipo == 'entrada' ? 'Entrada' : 'Saída' }}
@@ -194,8 +198,10 @@ onMounted(() => {
   width: 320px;
 }
 
-.dashboard-graphic, .dashboard-table {
+.dashboard-graphic,
+.dashboard-table {
   flex: 1;
+  position: relative;
 }
 
 .dashboard-indicators {
@@ -219,11 +225,7 @@ onMounted(() => {
   margin-bottom: 12px;
 }
 
-.dashboard-table {
-  position: relative;
-}
-
-.dashboard-table .dashboard-download-btn {
+.dashboard-download-btn {
   position: absolute;
   top: 0;
   right: 0;

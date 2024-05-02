@@ -21,6 +21,9 @@ export default {
       chartOptions: {
         chart: {
           type: 'bar',
+          toolbar: {
+            show: false,
+          }
         },
         plotOptions: {
           bar: {
