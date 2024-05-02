@@ -83,7 +83,7 @@ onMounted(() => {
     Um erro interno aconteceu. Tente novamente mais tarde.
   </v-snackbar>
   <main class="dashboard-main">
-    <Titulo content="Dashboard" />
+    <Titulo style="margin: 12px auto;" content="Dashboard" />
     <div class="dashboard-content">
       <div class="dashboard-filters">
         <v-select
@@ -108,17 +108,18 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Indicadores
           </h1>
-          <Indicador title="Número total de pessoas em redzone" subtitle="Neste momento" :value="`${
+          <Indicador class="dashboard-indicator" title="Pessoas em redzone" subtitle="Neste momento" :value="`${
             state.graphic_data?.indicadores?.total_pessoas !== undefined ? 
             state.graphic_data?.indicadores?.total_pessoas
              : '-'}`" />
-          <Indicador title="Número total de entradas" subtitle="Desde o início" :value="`${
+          <Indicador class="dashboard-indicator" title="Total de entradas" subtitle="Desde o início" :value="`${
             state.graphic_data?.indicadores?.total_entradas !== undefined ? 
             state.graphic_data?.indicadores?.total_entradas
             : '-'}`" />
         </div>
       </div>
-      <div class="dashboard-content-row">
+      <hr style="width: 95%; margin: auto; opacity: 30%;" />
+      <div style="margin-top: 12px;" class="dashboard-content-row">
         <div class="dashboard-table">
           <h1 class="dashboard-title">
             Registros de entradas e saídas
@@ -138,12 +139,15 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.dashboard-main {
+  margin-top: -12px;
+}
+
 .dashboard-content {
   margin: 12px auto;
-  width: 90%;
+  width: calc(100% - 48px);
   display: flex;
   flex-direction: column;
-  gap: 32px;
 }
 
 .dashboard-content-row {
@@ -153,7 +157,7 @@ onMounted(() => {
 }
 
 .dashboard-filters {
-  width: 240px;
+  width: 320px;
 }
 
 .dashboard-graphic, .dashboard-table {
@@ -167,7 +171,12 @@ onMounted(() => {
   width: fit-content;
   align-items: center;
   align-self: flex-start;
-  gap: 16px
+  gap: 16px;
+  height: 200px;
+}
+
+.dashboard-indicator {
+  flex: 1;
 }
 
 .dashboard-title {
