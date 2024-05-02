@@ -15,7 +15,7 @@ import Redzone from '@/services/Redzone';
 const state = ref({
   graphic_data: {} as IDashboardResponse,
   redzones: [] as IRedzone[],
-  selectedRedzone: '',
+  selectedRedzone: 'Todos',
   loading: false,
   error: false,
 });
@@ -37,7 +37,7 @@ const headers = [
 
 const getDashboard = () => {
   state.value.loading = true;
-  Dashboard.getDashboard(state.value.selectedRedzone ? Number(state.value.selectedRedzone.split('-')[0]) : undefined)
+  Dashboard.getDashboard(state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined)
   .then(res => {
     if (res.data && res.status == 200) {
       state.value.graphic_data = res.data
@@ -51,7 +51,7 @@ const getDashboard = () => {
     console.log(err);
     state.value.error = true;
     state.value.loading = false;
-  })
+  });
 }
 
 onMounted(() => {
@@ -86,13 +86,16 @@ onMounted(() => {
     <Titulo content="Dashboard" />
     <div class="dashboard-content">
       <div class="dashboard-filters">
-        <v-combobox
+        <v-select
           label="Redzone"
           variant="underlined"
-          :items="state.redzones.map(redzone => `${redzone.id} - ${redzone.nome}`)"
+          :items="[
+            'Todos',
+            ...state.redzones.map(redzone => `${redzone.id} - ${redzone.nome}`)
+          ]"
           v-model="state.selectedRedzone"
           @update:model-value="getDashboard"
-        ></v-combobox>
+        ></v-select>
       </div>
       <div class="dashboard-content-row">
         <div class="dashboard-graphic">
