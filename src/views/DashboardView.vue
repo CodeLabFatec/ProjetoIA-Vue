@@ -4,13 +4,13 @@ import { onMounted, ref } from 'vue';
 import GraficoPessoasDia from '@/components/GraficoPessoasDia.vue'
 import Titulo from '@/components/Titulo.vue';
 import Indicador from '@/components/Indicador.vue';
+import LoadingBar from '@/components/LoadingBar.vue';
 
 import Dashboard from '@/services/Dashboard';
 
 import type IDashboardResponse from "@/interfaces/IDashboardResponse";
 import type IRedzone from '@/interfaces/IRedzone';
 import Redzone from '@/services/Redzone';
-import LoadingBar from '@/components/LoadingBar.vue';
 
 const state = ref({
   graphic_data: {} as IDashboardResponse,
@@ -87,7 +87,6 @@ onMounted(() => {
     <div class="dashboard-content">
       <div class="dashboard-filters">
         <v-combobox
-          clearable
           label="Redzone"
           variant="underlined"
           :items="state.redzones.map(redzone => `${redzone.id} - ${redzone.nome}`)"
@@ -106,8 +105,14 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Indicadores
           </h1>
-          <Indicador title="Número total de pessoas em redzone" subtitle="Neste momento" :value="`${state.graphic_data?.indicadores?.total_pessoas || '-'}`" />
-          <Indicador title="Número total de entradas" subtitle="Desde o início" :value="`${state.graphic_data?.indicadores?.total_entradas || '-'}`" />
+          <Indicador title="Número total de pessoas em redzone" subtitle="Neste momento" :value="`${
+            state.graphic_data?.indicadores?.total_pessoas !== undefined ? 
+            state.graphic_data?.indicadores?.total_pessoas
+             : '-'}`" />
+          <Indicador title="Número total de entradas" subtitle="Desde o início" :value="`${
+            state.graphic_data?.indicadores?.total_entradas !== undefined ? 
+            state.graphic_data?.indicadores?.total_entradas
+            : '-'}`" />
         </div>
       </div>
       <div class="dashboard-content-row">
