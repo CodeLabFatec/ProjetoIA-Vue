@@ -4,21 +4,24 @@
       <div class="nav-icon-container">
         <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
       </div>
-      <v-list active-class="active-item">
-        <v-list-item prepend-icon="mdi-home">Home</v-list-item>
+      <v-list v-model:opened="open" active-class="active-item">
+        <router-link to="/home">
+          <v-list-item prepend-icon="mdi-home">Home</v-list-item>
+        </router-link>
         <v-list-group value="Redzones">
-          <template #activator="{ props }">
+          <template v-slot:activator="{ props }">
             <v-list-item
               v-bind="props"
               prepend-icon="mdi-plus-circle"
-            >RedZones</v-list-item>
+              title="Redzones"
+            ></v-list-item>
           </template>
 
           <v-list-item>Cadastro de áreas</v-list-item>
           <v-list-item>Cadastro de redzones</v-list-item>
           <v-list-item>Relatórios</v-list-item>
         </v-list-group>
-        <v-list-item prepend-icon="mdi-account">Cadastros</v-list-item>
+        <!-- <v-list-item prepend-icon="mdi-account">Cadastros</v-list-item> -->
       </v-list>
     </v-navigation-drawer>
 
@@ -26,8 +29,6 @@
       <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
       <img src="../assets/logo.png" alt="Altave" />
     </header>
-
-    <slot></slot>
   </v-app>
 </template>
 
@@ -35,6 +36,7 @@
 export default {
   data() {
     return {
+      open: ['Redzones'],
       isDrawerOpen: false,
     };
   },
@@ -68,5 +70,18 @@ export default {
   color: white;
   display: flex;
   
+}
+
+a{
+  text-decoration: none;
+}
+.v-list-item {
+  color: white; 
+  transition: all 0.3s ease;
+  cursor: pointer; 
+}
+
+.v-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.1); 
 }
 </style>
