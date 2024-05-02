@@ -5,8 +5,9 @@ import Cabecalho from './components/Cabecalho.vue';
 </script>
 
 <template>
-  <Cabecalho />
-  <RouterView />
+  <Cabecalho>
+    <RouterView />
+  </Cabecalho>
 </template>
 
 <style scoped>

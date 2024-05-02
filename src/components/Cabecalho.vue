@@ -4,7 +4,7 @@
       <div class="nav-icon-container">
         <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
       </div>
-      <v-list-item-group active-class="active-item">
+      <v-list active-class="active-item">
         <v-list-item prepend-icon="mdi-home">Home</v-list-item>
         <v-list-group value="Redzones">
           <template #activator="{ props }">
@@ -19,13 +19,15 @@
           <v-list-item>Relatórios</v-list-item>
         </v-list-group>
         <v-list-item prepend-icon="mdi-account">Cadastros</v-list-item>
-      </v-list-item-group>
+      </v-list>
     </v-navigation-drawer>
 
     <header class="container">
       <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
       <img src="../assets/logo.png" alt="Altave" />
     </header>
+
+    <slot></slot>
   </v-app>
 </template>
 
