@@ -11,7 +11,7 @@ const state = ref({
   success: false,
 })
 
-const getRelatorio = (reportType: "7-days" | "14-days") => {
+const getRelatorio = (reportType: "7-days" | "all") => {
   state.value.error = false;
   state.value.success = false;
   Relatorio.getRelatorio(reportType)
@@ -34,7 +34,7 @@ const getRelatorio = (reportType: "7-days" | "14-days") => {
     <Titulo content="Relatórios" />
     <div class="fields-container">
       <Botao @click="getRelatorio('7-days')" class="btn" content="Últimos 7 dias" />
-      <Botao @click="getRelatorio('14-days')" class="btn" content="Últimos 14 dias" />
+      <!-- <Botao @click="getRelatorio('14-days')" class="btn" content="Últimos 14 dias" /> -->
     </div>
     <div v-if="state.error" class="error-warning">Erro ao gerar relatório, tente novamente mais tarde.</div>
     <div v-if="state.success" class="success-warning">Relatório gerado com sucesso!</div>

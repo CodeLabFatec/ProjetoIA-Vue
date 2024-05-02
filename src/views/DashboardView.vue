@@ -7,10 +7,11 @@ import Indicador from '@/components/Indicador.vue';
 import LoadingBar from '@/components/LoadingBar.vue';
 
 import Dashboard from '@/services/Dashboard';
+import Redzone from '@/services/Redzone';
+import Relatorio from '@/services/Relatorio';
 
 import type IDashboardResponse from "@/interfaces/IDashboardResponse";
 import type IRedzone from '@/interfaces/IRedzone';
-import Redzone from '@/services/Redzone';
 
 const state = ref({
   graphic_data: {} as IDashboardResponse,
@@ -18,6 +19,9 @@ const state = ref({
   selectedRedzone: 'Todos',
   loading: false,
   error: false,
+  errorExport: false,
+  successExport: false,
+  loadingExportTable: false,
 });
 
 const headers = [
@@ -54,6 +58,24 @@ const getDashboard = () => {
   });
 }
 
+const exportTable = () => {
+  state.value.loadingExportTable = true;
+  Relatorio.getRelatorio('all')
+  .then(res => {
+    if (res.status !== 200) {
+      state.value.errorExport = true;
+    } else {
+      state.value.successExport = true;
+    }
+    state.value.loadingExportTable = false;
+  })
+  .catch(err => {
+    console.log(err);
+    state.value.errorExport = true;
+    state.value.loadingExportTable = false;
+  });
+}
+
 onMounted(() => {
   getDashboard();
 
@@ -81,6 +103,12 @@ onMounted(() => {
   <LoadingBar :visible="state.loading" />
   <v-snackbar color="red" v-model="state.error">
     Um erro interno aconteceu. Tente novamente mais tarde.
+  </v-snackbar>
+  <v-snackbar color="red" v-model="state.errorExport">
+    Erro ao baixar arquivo. Tente novamente mais tarde
+  </v-snackbar>
+  <v-snackbar color="green" v-model="state.successExport">
+    Exportado com sucesso! Baixando arquivo...
   </v-snackbar>
   <main class="dashboard-main">
     <Titulo style="margin: 12px auto;" content="Dashboard" />
@@ -121,6 +149,12 @@ onMounted(() => {
       <hr style="width: 95%; margin: auto; opacity: 30%;" />
       <div style="margin-top: 12px;" class="dashboard-content-row">
         <div class="dashboard-table">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ props }">
+              <v-btn class="dashboard-download-btn" icon="mdi-download" variant="text" color="#004488" v-bind="props" :loading="state.loadingExportTable" @click="exportTable"></v-btn>
+            </template>
+            <span>Baixar tabela em XLSX</span>
+          </v-tooltip>
           <h1 class="dashboard-title">
             Registros de entradas e saídas
           </h1>
@@ -183,5 +217,15 @@ onMounted(() => {
   font-size: 18px;
   text-align: center;
   margin-bottom: 12px;
+}
+
+.dashboard-table {
+  position: relative;
+}
+
+.dashboard-table .dashboard-download-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 </style>

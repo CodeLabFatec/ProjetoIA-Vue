@@ -1,12 +1,12 @@
-import api from "./api";
+import apiPython from "./apiPython";
 
 class Relatorio {
-  async getRelatorio(type_relatorio: '7-days' | '14-days'): Promise<{ status: number }> {
-    const endpoint = type_relatorio == '7-days' ? '/report-7-days' : '/report-14-days'
+  async getRelatorio(type_relatorio: '7-days' | 'all'): Promise<{ status: number }> {
+    const endpoint = type_relatorio == '7-days' ? '/report-7-days' : '/report-log'
     try {
-      const resp = await api.get(endpoint, { responseType: "blob" });
+      const resp = await apiPython.get(endpoint, { responseType: "blob" });
 
-      const date = new Date()
+      const date = new Date();
 
       const filename = `relatorio-${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}.xlsx`
 
