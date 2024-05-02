@@ -99,7 +99,7 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Quantidade de pessoas por dia (últimos 7 dias)
           </h1>
-          <GraficoPessoasDia :graphic_data="state.graphic_data?.grafico" />
+          <GraficoPessoasDia :loading="state.loading" :graphic_data="state.graphic_data?.grafico" />
         </div>
         <div class="dashboard-indicators">
           <h1 class="dashboard-title">
