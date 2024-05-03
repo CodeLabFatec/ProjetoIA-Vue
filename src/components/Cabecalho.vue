@@ -29,6 +29,7 @@
       <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
       <img src="../assets/logo.png" alt="Altave" />
     </header>
+    <slot></slot>
   </v-app>
 </template>
 
