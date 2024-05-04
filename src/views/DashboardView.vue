@@ -80,6 +80,10 @@ const exportContent = (source: 'table' | 'graphic') => {
     });
 }
 
+const exportPdf = () => {
+  window.print();
+}
+
 onMounted(() => {
   getDashboard();
 
@@ -104,6 +108,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <img class="dashboard-header-print" src="../assets/header-printeable.png">
   <LoadingBar :visible="state.loading" />
   <v-snackbar color="red" v-model="state.error">
     Um erro interno aconteceu. Tente novamente mais tarde.
@@ -115,13 +120,27 @@ onMounted(() => {
     Exportado com sucesso! Baixando arquivo...
   </v-snackbar>
   <main class="dashboard-main">
-    <Titulo style="margin: 12px auto;" content="Dashboard" />
+    <div class="dashboard-header-printeable">
+      <Titulo style="margin: auto;" content="Relatório geral" />
+      <div class="dashboard-header-printeable-subtitle">
+        Relatório emitido em <b>{{ new Date().toLocaleDateString('pt-BR') }} às {{ new Date().toLocaleTimeString('pt-BR') }}</b>
+      </div>
+      <div class="dashboard-header-printeable-subtitle">
+        Redzone: <b>{{ state.selectedRedzone == 'Todos' ? 'Todos' : `${state.selectedRedzone.split('-')[1]} [ ID: ${state.selectedRedzone.split('-')[0]} ]` }}</b>
+      </div>
+    </div>
+    <div class="dashboard-header">
+      <Titulo style="margin: 24px auto;" content="Dashboard" />
+    </div>
     <div class="dashboard-content">
       <div class="dashboard-filters">
-        <v-select label="Redzone" variant="underlined" :items="[
+        <div class="dashboard-selector">
+          <v-select color="#004488" label="Redzone" variant="underlined" :items="[
     'Todos',
     ...state.redzones.map(redzone => `${redzone.id} - ${redzone.nome}`)
   ]" v-model="state.selectedRedzone" @update:model-value="getDashboard"></v-select>
+        </div>
+        <v-btn @click="exportPdf" variant="outlined" color="#004488" append-icon="mdi-download">Baixar relatório completo</v-btn>
       </div>
       <div class="dashboard-content-row">
         <div class="dashboard-graphic">
@@ -130,18 +149,28 @@ onMounted(() => {
               <v-btn class="dashboard-download-btn" icon="mdi-download" variant="text" color="#004488" v-bind="props"
                 :loading="state.loadingExportGraphic" @click="exportContent('graphic')"></v-btn>
             </template>
-            <span>Baixar relatório últimos 7 dias</span>
+            <span>Baixar relatório últimos 7 dias em XLSX</span>
           </v-tooltip>
           <h1 class="dashboard-title">
             Quantidade de pessoas por dia (últimos 7 dias)
           </h1>
           <GraficoPessoasDia :loading="state.loading" :graphic_data="state.graphic_data?.grafico" />
         </div>
+        <div class="dashboard-graphic-printeable-size"></div>
+        <div class="dashboard-graphic-printeable">
+          <h1 class="dashboard-title">
+            Quantidade de pessoas por dia (últimos 7 dias)
+          </h1>
+          <GraficoPessoasDia :loading="state.loading" :graphic_data="state.graphic_data?.grafico" />
+        </div>
+        <h1 class="dashboard-title-printeable">
+          Indicadores
+        </h1>
         <div class="dashboard-indicators">
           <h1 class="dashboard-title">
             Indicadores
           </h1>
-          <Indicador class="dashboard-indicator" title="Pessoas em redzone" subtitle="Neste momento" :value="`${state.graphic_data?.indicadores?.total_pessoas !== undefined ?
+          <Indicador class="dashboard-indicator" title="Pessoas em redzone" subtitle="Neste momento" subtitle_printeable="No momento da emissão do relatório" :value="`${state.graphic_data?.indicadores?.total_pessoas !== undefined ?
     state.graphic_data?.indicadores?.total_pessoas
     : '-'}`" />
           <Indicador class="dashboard-indicator" title="Total de entradas" subtitle="Desde o início" :value="`${state.graphic_data?.indicadores?.total_entradas !== undefined ?
@@ -149,7 +178,7 @@ onMounted(() => {
     : '-'}`" />
         </div>
       </div>
-      <hr style="width: 95%; margin: auto; opacity: 30%;" />
+      <hr class="dashboard-hr" />
       <div style="margin-top: 12px;" class="dashboard-content-row">
         <div class="dashboard-table">
           <v-tooltip bottom>
@@ -162,14 +191,39 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Registros de entradas e saídas
           </h1>
-          <v-data-table :headers="headers" :items="state.graphic_data?.tabela">
-            <template v-slot:item.data="{ item }">
-              {{ new Date(item.data).toLocaleDateString('pt-BR') }}
-            </template>
-            <template v-slot:item.tipo="{ item }">
-              {{ item.tipo == 'entrada' ? 'Entrada' : 'Saída' }}
-            </template>
-          </v-data-table>
+          <div class="dashboard-table-content">
+            <v-data-table :headers="headers" :items="state.graphic_data?.tabela">
+              <template v-slot:item.data="{ item }">
+                {{ `${new Date(item.data).toLocaleDateString('pt-BR')} às ${new Date(item.data).toLocaleTimeString('pt-BR')}` }}
+              </template>
+              <template v-slot:item.tipo="{ item }">
+                {{ item.tipo == 'entrada' ? 'Entrada' : 'Saída' }}
+              </template>
+            </v-data-table>
+          </div>
+          <div class="dashboard-table-content-printeable">
+            <v-table density="compact">
+              <thead>
+                <tr>
+                  <th v-for="head in headers" class="text-left">
+                    <b>{{ head.title }}</b>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="dashboard-table-row" v-for="item in state.graphic_data?.tabela">
+                  <td v-for="column in headers">
+                    {{ 
+                      column.key == 'data' ?
+                      `${new Date(item[column.key]).toLocaleDateString('pt-BR')} às ${new Date(item[column.key]).toLocaleTimeString('pt-BR')}`
+                      // @ts-ignore
+                      : item[column.key] 
+                    }}
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </div>
         </div>
       </div>
     </div>
@@ -177,6 +231,19 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.dashboard-header-print,
+.dashboard-header-printeable,
+.dashboard-title-printeable,
+.dashboard-table-content-printeable {
+  display: none;
+}
+
+.dashboard-hr {
+  width: 95%;
+  margin: 32px auto;
+  border-color: #004488;
+}
+
 .dashboard-main {
   margin-top: -12px;
 }
@@ -192,9 +259,18 @@ onMounted(() => {
   display: flex;
   flex-direction: row;
   gap: 24px;
+  position: relative;
+  background-color: white
 }
 
 .dashboard-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px
+}
+
+.dashboard-selector {
   width: 320px;
 }
 
@@ -202,6 +278,15 @@ onMounted(() => {
 .dashboard-table {
   flex: 1;
   position: relative;
+}
+
+.dashboard-graphic-printeable {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 745px;
+  z-index: -1;
 }
 
 .dashboard-indicators {
@@ -219,7 +304,8 @@ onMounted(() => {
   flex: 1;
 }
 
-.dashboard-title {
+.dashboard-title,
+.dashboard-title-printeable {
   font-size: 18px;
   text-align: center;
   margin-bottom: 12px;
@@ -229,5 +315,92 @@ onMounted(() => {
   position: absolute;
   top: 0;
   right: 0;
+}
+
+@media print {
+  .dashboard-header,
+  .dashboard-filters,
+  .dashboard-download-btn,
+  .dashboard-indicators .dashboard-title,
+  .dashboard-table-content,
+  .dashboard-graphic {
+    display: none;
+  }
+
+  .dashboard-table-content-printeable {
+    display: block;
+  }
+
+  .dashboard-hr {
+    margin: 0;
+    opacity: 0;
+    page-break-after: always;
+  }
+
+  .dashboard-header-print {
+    display: block;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: auto;
+  }
+
+  .dashboard-header-printeable {
+    display: block;
+    margin-block: 72px;
+  }
+
+  .dashboard-content-row {
+    flex-direction: column;
+    gap: 0;
+    background-color: transparent
+  }
+  
+  .dashboard-indicators {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: fit-content
+  }
+
+  .dashboard-indicator {
+    margin: 0;
+  }
+
+  .dashboard-title-printeable {
+    display: block;
+    margin-top: 32px;
+  }
+
+  .dashboard-title-printeable, .dashboard-title {
+    font-size: 24px;
+    color: var(--dark-blue);
+  }
+
+  .dashboard-table {
+    margin-top: 32px;
+  }
+
+  .dashboard-table .dashboard-title {
+    margin-bottom: 26px;
+  }
+
+  .dashboard-table-row {
+    break-inside: avoid;
+  }
+
+  .dashboard-graphic {
+    display: none;
+  }
+ 
+  .dashboard-graphic-printeable-size {
+    height: 370px;
+  }
+
+  .dashboard-header-printeable-subtitle {
+    text-align: center;
+    margin-top: 12px;
+  }
 }
 </style>

@@ -12,6 +12,10 @@ export default {
     value: {
       type: String,
       required: true,
+    },
+    subtitle_printeable: {
+      type: String,
+      required: false,
     }
   }
 }
@@ -28,10 +32,17 @@ export default {
     <h4 v-if="$props.subtitle" class="indicador-subtitle">
       {{ $props.subtitle }}
     </h4>
+    <h4 v-if="$props.subtitle_printeable || $props.subtitle" class="indicador-subtitle-printeable">
+      {{ $props.subtitle_printeable || $props.subtitle }}
+    </h4>
   </div>
 </template>
 
 <style scoped>
+.indicador-subtitle-printeable {
+  display: none;
+}
+
 .indicador-container {
   background-color: var(--blue);
   border-radius: 12px;
@@ -44,7 +55,8 @@ export default {
   justify-content: center;
 }
 
-.indicador-container h3, .indicador-container h4 {
+.indicador-container h3,
+.indicador-container h4 {
   padding: 0;
   margin: 0;
   text-align: center;
@@ -63,5 +75,24 @@ export default {
 .indicador-value {
   font-weight: bold;
   font-size: 28px;
+}
+
+@media print {
+  .indicador-subtitle {
+    display: none;
+  }
+
+  .indicador-title,
+  .indicador-subtitle-printeable {
+    color: black;
+  }
+
+  .indicador-value {
+    color: var(--blue);
+  }
+
+  .indicador-subtitle-printeable {
+    display: block;
+  }
 }
 </style>
