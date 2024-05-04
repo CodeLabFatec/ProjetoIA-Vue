@@ -13,21 +13,13 @@ class RegistroEntradasSaidas {
         }`
       );
 
-      // for tests only
-      // const { data, status } = {
-      //   data: {
-      //     peopleByRedzone: 23,
-      //   },
-      //   status: 200,
-      // };
-
       return {
         status,
-        data: data?.peopleByRedzone,
+        data: data?.peopleByRedZone,
       };
     } catch (err) {
-      console.log(err);
-      return { status: 500 };
+      console.log('length', err);
+      return {status: 500 };
     }
   }
 
@@ -36,32 +28,17 @@ class RegistroEntradasSaidas {
     redzone_id?: number
   ): Promise<{ status: number; data?: IRegistroResponse[] }> {
     try {
-      const { data, status } = await api.get(
-        `/${tipo}-redzone${redzone_id ? `?redZoneId=${redzone_id}` : ""}`
-      );
+      const { data, status } = await api.get(`/${tipo}-redzone`);
 
-      // for tests only
-      // const { data, status } = {
-      //   status: 200,
-      //   data: [
-      //     {
-      //       id: 1,
-      //       data: new Date().toISOString(),
-      //       redzone: {
-      //         data: new Date().toISOString(),
-      //         descricao: `
-      //       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec mollis nunc et rhoncus sagittis. Mauris arcu tellus, venenatis at molestie id, dapibus ut purus. Mauris sed orci justo. Duis imperdiet tempor mattis. Nam accumsan pulvinar risus, sed vulputate massa. Quisque ut semper nibh, sit amet hendrerit lacus. Mauris nisl leo, dignissim nec nibh ut, scelerisque egestas nibh. Sed volutpat, lacus a varius fermentum, dolor felis pellentesque libero, at sagittis justo urna sed tortor. In non odio semper, feugiat metus at, laoreet libero. Vivamus molestie tellus ut mauris tristique semper.
-      //       `,
-      //         id: 1,
-      //         nome: "nome redzone",
-      //       },
-      //     },
-      //   ],
-      // };
+      const data_filtered = redzone_id
+        ? (data as IRegistroResponse[] | undefined)?.filter(
+            (item) => item.redZone.id == redzone_id
+          )
+        : data;
 
-      return { data, status };
+      return { data: data_filtered, status };
     } catch (err) {
-      console.log(err);
+      console.log("registros", err);
       return { status: 500 };
     }
   }

@@ -63,7 +63,10 @@ const exportContent = (source: 'table' | 'graphic') => {
   if (source == 'table') state.value.loadingExportTable = true;
   if (source == 'graphic') state.value.loadingExportGraphic = true;
   state.value.errorExport = false;
-  Relatorio.getRelatorio(source == 'table' ? 'all' : '7-days')
+  Relatorio.getRelatorio(
+    source == 'table' ? 'all' : '7-days',
+    state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined
+  )
     .then(res => {
       if (res.status !== 200) {
         state.value.errorExport = true;

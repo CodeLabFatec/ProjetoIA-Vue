@@ -64,7 +64,10 @@ export default {
         const data_b = new Date(b.data);
 
         return data_a.getTime() - data_b.getTime();
-      }).map(item => new Date(item.data).toLocaleDateString('pt-BR')),
+      }).map(item => {
+        const [year, month, day] = item.data.split('-');
+        return `${day}/${month}/${year}`;
+      }),
     },
   }" :series="[{
     name: 'Pessoas',

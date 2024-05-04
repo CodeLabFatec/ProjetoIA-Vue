@@ -10,15 +10,19 @@ class Dashboard {
     return list.map((item) => ({
       data: item.data,
       tipo,
-      redzone: item.redzone.nome,
+      redzone: item.redZone.nome,
     }));
   };
 
   private filterRegisterByDate = (list: IRegistroResponse[], date: string) => {
-    return list.filter((item) => {
+    const filtered_list = list.filter((item) => {
       const item_date = new Date(item.data).toISOString().split("T")[0];
       return item_date === date;
     });
+
+    console.log({filtered_list, list, date})
+
+    return filtered_list
   };
 
   private convertRegistersInGraphicData = (list: IRegistroResponse[]) => {
@@ -55,36 +59,36 @@ class Dashboard {
       );
 
       if (
-        total_entradas.data &&
         total_entradas.status == 200 &&
-        total_saidas.data &&
         total_saidas.status == 200 &&
-        entradas.data &&
         entradas.status == 200 &&
-        saidas.data &&
         saidas.status == 200
       ) {
-        const merged_entradas_saidas = this.convertRegisterArray(
-          entradas.data as IRegistroResponse[],
-          "entrada"
-        )
-          .concat(this.convertRegisterArray(
-            saidas.data as IRegistroResponse[], 
+        const merged_entradas_saidas = [
+          ...this.convertRegisterArray(
+            entradas.data as IRegistroResponse[],
+            "entrada"
+          ),
+          ...this.convertRegisterArray(
+            saidas.data as IRegistroResponse[],
             "saida"
-          ))
-          .sort((a, b) => {
-            let data_a = new Date(a.data);
-            let data_b = new Date(b.data);
+          ),
+        ].sort((a, b) => {
+          let data_a = new Date(a.data);
+          let data_b = new Date(b.data);
 
-            return data_b.getTime() - data_a.getTime();
-          });
+          return data_b.getTime() - data_a.getTime();
+        });
 
         const info_dashboard: IDashboardResponse = {
-          grafico: this.convertRegistersInGraphicData(entradas.data as IRegistroResponse[]),
+          grafico: this.convertRegistersInGraphicData(
+            entradas.data as IRegistroResponse[]
+          ),
           tabela: merged_entradas_saidas,
           indicadores: {
-            total_pessoas: (total_entradas.data as number) - (total_saidas.data as number),
-            total_entradas: (total_entradas.data as number),
+            total_pessoas:
+              (total_entradas.data as number) - (total_saidas.data as number),
+            total_entradas: total_entradas.data as number,
           },
         };
 
