@@ -111,13 +111,13 @@ onMounted(() => {
 <template>
   <img class="dashboard-header-print" src="../assets/header-printeable.png">
   <LoadingBar :visible="state.loading" />
-  <v-snackbar color="red" v-model="state.error">
+  <v-snackbar class="dashboard-snackbar"color="red" v-model="state.error">
     Um erro interno aconteceu. Tente novamente mais tarde.
   </v-snackbar>
-  <v-snackbar color="red" v-model="state.errorExport">
+  <v-snackbar class="dashboard-snackbar"color="red" v-model="state.errorExport">
     Erro ao baixar arquivo. Tente novamente mais tarde
   </v-snackbar>
-  <v-snackbar color="green" v-model="state.successExport">
+  <v-snackbar class="dashboard-snackbar"color="green" v-model="state.successExport">
     Exportado com sucesso! Baixando arquivo...
   </v-snackbar>
   <main class="dashboard-main">
@@ -402,6 +402,10 @@ onMounted(() => {
   .dashboard-header-printeable-subtitle {
     text-align: center;
     margin-top: 12px;
+  }
+
+  .dashboard-snackbar {
+    display: none;
   }
 }
 </style>
