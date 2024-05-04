@@ -10,7 +10,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: DashboardView
     },
     {
       path: '/redzones',
@@ -28,7 +28,7 @@ const router = createRouter({
       component: RedzonesFormView
     },
     {
-      path: '/dashboard',
+      path: '/report',
       name: 'dashboard',
       component: DashboardView
     },

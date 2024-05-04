@@ -398,6 +398,9 @@ onMounted(() => {
     display: none;
   }
  
+  .dashboard-graphic-printeable {
+    z-index: 1;
+  }
   .dashboard-graphic-printeable-size {
     height: 370px;
   }
