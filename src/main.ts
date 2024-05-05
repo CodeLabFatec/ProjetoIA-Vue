@@ -8,9 +8,13 @@ import "vuetify/styles";
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
-import { createI18n, useI18n } from "vue-i18n";
 import { createVueI18nAdapter } from "vuetify/locale/adapters/vue-i18n";
 import { en, pt } from "vuetify/locale";
+
+import { createI18n, useI18n } from "vue-i18n";
+
+import VueApexCharts from "vue3-apexcharts";
+import apexPt from '@/assets/apex-charts-pt-language.json';
 
 const messages = {
   en: {
@@ -36,9 +40,16 @@ const vuetify = createVuetify({
   },
 });
 
+
 const app = createApp(App);
 
 app.use(router);
 app.use(vuetify);
+app.use(VueApexCharts);
+
+window.Apex.chart = {
+  locales: [apexPt],
+  defaultLocale: 'pt'
+}
 
 app.mount("#app");

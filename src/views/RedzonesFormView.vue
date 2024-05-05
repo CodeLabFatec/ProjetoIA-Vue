@@ -6,6 +6,7 @@ import Titulo from '@/components/Titulo.vue';
 import Botao from '@/components/Botao.vue';
 
 import Redzone from '@/services/Redzone';
+import LoadingBar from '@/components/LoadingBar.vue';
 
 const router = useRouter();
 const route_data = useRoute();
@@ -95,9 +96,7 @@ const clearError = () => {
 
 <template>
   <main class="redzonesform">
-    <div class="redzonesform-progressbar">
-      <v-progress-linear v-if="state.loading" indeterminate color="#004488"></v-progress-linear>
-  </div>
+    <LoadingBar :visible="state.loading" />
     <div class="redzonesform-titulo-container">
       <div class="redzonesform-backbtn">
         <v-btn @click="goBack" variant="text" icon="mdi-arrow-left" color="#004488"></v-btn>
@@ -129,13 +128,6 @@ const clearError = () => {
 <style scoped>
 .redzonesform-backbtn {
   position: absolute;
-  top: 74px;
-  left: 0;
-}
-
-.redzonesform-progressbar {
-  position: absolute;
-  width: 100%;
   top: 74px;
   left: 0;
 }

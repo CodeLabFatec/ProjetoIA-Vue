@@ -90,7 +90,7 @@ const confirmDeleteItem = () => {
     updateDeleteModal(false);
     Redzone.delete(state.value.selectedRedzone.id)
       .then(res => {
-        if (res.status == 200) {
+        if (res.status == 204) {
           state.value.deleteSuccess = true;
           getRedzones();
         } else {
