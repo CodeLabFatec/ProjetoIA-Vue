@@ -11,10 +11,12 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "apexcharts": "^3.49.0",
     "axios": "^1.6.8",
     "vue": "^3.4.21",
     "vue-i18n": "^9.11.0",
     "vue-router": "^4.3.0",
+    "vue3-apexcharts": "^1.5.2",
     "vuetify": "^3.5.14"
   },
   "devDependencies": {

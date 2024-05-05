@@ -9,6 +9,9 @@
   --light-gray: #515558;
   --light-gray-100: #7A7F84;
   --white: #FFF;
+  --red: red;
+  --light-red: rgb(255, 123, 123);
+  --red-gray: rgb(170, 81, 81);
 
   --default-font: "Inter", sans-serif;
 }
