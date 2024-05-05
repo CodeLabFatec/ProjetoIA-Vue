@@ -16,7 +16,6 @@
           </template>
             <v-list-item @click="goTo('redzones')">Lista de Redzones</v-list-item>
             <v-list-item @click="goTo('redzones/create')">Cadastro de redzones</v-list-item>
-            <v-list-item @click="goTo('report')">Relatório</v-list-item>
             <!-- <v-list-item>Cadastro de áreas</v-list-item> -->
         </v-list-group>
         <!-- <v-list-item prepend-icon="mdi-account">Cadastros</v-list-item> -->
