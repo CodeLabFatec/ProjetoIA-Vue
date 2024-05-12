@@ -44,15 +44,16 @@ class Dashboard {
   };
 
   async getDashboard(
-    id_redzone?: number
+    id_redzone?: number,
+    id_area?: number,
   ): Promise<{ status: number; data?: IDashboardResponse }> {
     try {
       const [total_entradas, total_saidas, entradas, saidas] = (
         await Promise.allSettled([
-          RegistroEntradasSaidas.getRegistroLength("entrada", id_redzone),
-          RegistroEntradasSaidas.getRegistroLength("saida", id_redzone),
-          RegistroEntradasSaidas.getRegistros("entrada", id_redzone),
-          RegistroEntradasSaidas.getRegistros("saida", id_redzone),
+          RegistroEntradasSaidas.getRegistroLength("entrada", id_redzone, id_area),
+          RegistroEntradasSaidas.getRegistroLength("saida", id_redzone, id_area),
+          RegistroEntradasSaidas.getRegistros("entrada", id_redzone, id_area),
+          RegistroEntradasSaidas.getRegistros("saida", id_redzone, id_area),
         ])
       ).map((result) =>
         result.status === "fulfilled" ? result.value : { status: 500 }
