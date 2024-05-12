@@ -2,9 +2,32 @@ import type IRedzone from "@/interfaces/IRedzone";
 import api from "./api";
 
 class Redzone {
-  async getRedzones(): Promise<{ data: IRedzone[]; status: number }> {
+  async getRedzones(
+    area_id?: number
+  ): Promise<{ data: IRedzone[]; status: number }> {
     try {
-      const { data, status } = await api.get("/redzone");
+      const params = {} as any;
+      if (area_id) params.areaId = area_id;
+      const { data, status } = await api.get("/redzone", { params });
+      
+      // for tests only
+      // const area = {
+      //   id: 1,
+      //   nome: "area 1",
+      //   descricao: "lorem ipsum",
+      // }
+      // const { data, status } = {
+      //   status: 200,
+      //   data: !area_id ? [
+      //     { id: 1, nome: "1", descricao: "1", data: new Date().toISOString(), area },
+      //     { id: 2, nome: "2", descricao: "1", data: new Date().toISOString(), area },
+      //     { id: 3, nome: "3", descricao: "1", data: new Date().toISOString(), area },
+      //   ] : [
+      //     { id: 1, nome: "1", descricao: "1", data: new Date().toISOString(), area },
+      //     { id: 2, nome: "2", descricao: "1", data: new Date().toISOString(), area },
+      //   ]
+      // };
+
       return { data: status == 200 ? data : [], status };
     } catch (err) {
       console.log(err);

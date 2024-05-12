@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 import GraficoPessoasDia from '@/components/GraficoPessoasDia.vue'
 import Titulo from '@/components/Titulo.vue';
@@ -9,14 +9,20 @@ import LoadingBar from '@/components/LoadingBar.vue';
 import Dashboard from '@/services/Dashboard';
 import Redzone from '@/services/Redzone';
 import Relatorio from '@/services/Relatorio';
+import Area from '@/services/Area';
 
 import type IDashboardResponse from "@/interfaces/IDashboardResponse";
 import type IRedzone from '@/interfaces/IRedzone';
+import type IArea from '@/interfaces/IArea';
 
 const state = ref({
   graphic_data: {} as IDashboardResponse,
   redzones: [] as IRedzone[],
+  areas: [] as IArea[],
+  redzonesSelector: [] as string[],
+  areasSelector: [] as string[],
   selectedRedzone: 'Todos',
+  selectedArea: 'Todos',
   loading: false,
   error: false,
   errorExport: false,
@@ -40,9 +46,65 @@ const headers = [
   },
 ]
 
+const updateSelector = (list: 'areasSelector' | 'redzonesSelector', items: IRedzone[] | IArea[]) => {
+  state.value[list] = [
+    'Todos',
+    ...items.map(item => `${item.id} - ${item.nome}`),
+  ]
+}
+
+watch(() => [state.value.areas, state.value.redzones], newValue => {
+  const [ newAreas, newRedzones ] = newValue;
+
+  updateSelector('areasSelector', newAreas);
+  updateSelector('redzonesSelector', newRedzones);
+});
+
+const getRedzones = (area_id?: number) => {
+  state.value.loading = true;
+  Redzone.getRedzones(area_id)
+    .then(res => {
+      if (res.status == 200) {
+        state.value.redzones = res.data;
+      } else {
+        state.value.error = true;
+        console.log(res);
+      }
+      state.value.loading = false;
+    })
+    .catch(err => {
+      console.log(err);
+      state.value.error = true;
+      state.value.loading = false;
+    });
+}
+
+const getAreas = () => {
+  state.value.loading = true;
+  Area.getAreas()
+    .then(res => {
+      if (res.status == 200) {
+        state.value.areas = res.data;
+        state.value.loading = false;
+      } else {
+        console.log(res);
+        state.value.error = true;
+        state.value.loading = false;
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      state.value.error = true;
+      state.value.loading = false;
+    });
+}
+
 const getDashboard = () => {
   state.value.loading = true;
-  Dashboard.getDashboard(state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined)
+  Dashboard.getDashboard(
+    state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined,
+    state.value.selectedArea !== 'Todos' ? Number(state.value.selectedArea.split('-')[0]) : undefined
+  )
     .then(res => {
       if (res.data && res.status == 200) {
         state.value.graphic_data = res.data
@@ -57,6 +119,20 @@ const getDashboard = () => {
       state.value.error = true;
       state.value.loading = false;
     });
+}
+
+const handleRedzoneSelector = () => {
+  getDashboard();
+}
+
+const handleAreaSelector = () => {
+  if (state.value.selectedArea !== 'Todos') {
+    getRedzones(Number(state.value.selectedArea.split('-')[0]));
+    state.value.selectedRedzone = 'Todos';
+  } else {
+    getRedzones();
+  }
+  getDashboard();
 }
 
 const exportContent = (source: 'table' | 'graphic') => {
@@ -90,23 +166,8 @@ const exportPdf = () => {
 
 onMounted(() => {
   getDashboard();
-
-  state.value.loading = true;
-  Redzone.getRedzones()
-    .then(res => {
-      if (res.status == 200) {
-        state.value.redzones = res.data;
-      } else {
-        state.value.error = true;
-        console.log(res);
-      }
-      state.value.loading = false;
-    })
-    .catch(err => {
-      console.log(err);
-      state.value.error = true;
-      state.value.loading = false;
-    });
+  getRedzones();
+  getAreas();
 });
 
 </script>
@@ -114,23 +175,25 @@ onMounted(() => {
 <template>
   <img class="dashboard-header-print" src="../assets/header-printeable.png">
   <LoadingBar :visible="state.loading" />
-  <v-snackbar class="dashboard-snackbar"color="red" v-model="state.error">
+  <v-snackbar class="dashboard-snackbar" color="red" v-model="state.error">
     Um erro interno aconteceu. Tente novamente mais tarde.
   </v-snackbar>
-  <v-snackbar class="dashboard-snackbar"color="red" v-model="state.errorExport">
+  <v-snackbar class="dashboard-snackbar" color="red" v-model="state.errorExport">
     Erro ao baixar arquivo. Tente novamente mais tarde
   </v-snackbar>
-  <v-snackbar class="dashboard-snackbar"color="green" v-model="state.successExport">
+  <v-snackbar class="dashboard-snackbar" color="green" v-model="state.successExport">
     Exportado com sucesso! Baixando arquivo...
   </v-snackbar>
   <main class="dashboard-main">
     <div class="dashboard-header-printeable">
       <Titulo style="margin: auto;" content="Relatório geral" />
       <div class="dashboard-header-printeable-subtitle">
-        Relatório emitido em <b>{{ new Date().toLocaleDateString('pt-BR') }} às {{ new Date().toLocaleTimeString('pt-BR') }}</b>
+        Relatório emitido em <b>{{ new Date().toLocaleDateString('pt-BR') }} às {{ new
+    Date().toLocaleTimeString('pt-BR') }}</b>
       </div>
       <div class="dashboard-header-printeable-subtitle">
-        Redzone: <b>{{ state.selectedRedzone == 'Todos' ? 'Todos' : `${state.selectedRedzone.split('-')[1]} [ ID: ${state.selectedRedzone.split('-')[0]} ]` }}</b>
+        Redzone: <b>{{ state.selectedRedzone == 'Todos' ? 'Todos' : `${state.selectedRedzone.split('-')[1]} [ ID:
+          ${state.selectedRedzone.split('-')[0]} ]` }}</b>
       </div>
     </div>
     <div class="dashboard-header">
@@ -138,13 +201,18 @@ onMounted(() => {
     </div>
     <div class="dashboard-content">
       <div class="dashboard-filters">
-        <div class="dashboard-selector">
-          <v-select color="#004488" label="Redzone" variant="underlined" :items="[
-    'Todos',
-    ...state.redzones.map(redzone => `${redzone.id} - ${redzone.nome}`)
-  ]" v-model="state.selectedRedzone" @update:model-value="getDashboard"></v-select>
+        <div class="dashboard-selector-container">
+          <div class="dashboard-selector">
+            <v-select color="#004488" label="Área" variant="underlined" :items="state.areasSelector"
+              v-model="state.selectedArea" @update:model-value="handleAreaSelector"></v-select>
+          </div>
+          <div class="dashboard-selector">
+            <v-select color="#004488" label="Redzone" variant="underlined" :items="state.redzonesSelector"
+              v-model="state.selectedRedzone" @update:model-value="handleRedzoneSelector"></v-select>
+          </div>
         </div>
-        <v-btn @click="exportPdf" variant="outlined" color="#004488" append-icon="mdi-download">Baixar relatório completo</v-btn>
+        <v-btn @click="exportPdf" variant="outlined" color="#004488" append-icon="mdi-download">Baixar relatório
+          completo</v-btn>
       </div>
       <div class="dashboard-content-row">
         <div class="dashboard-graphic">
@@ -174,7 +242,8 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Indicadores
           </h1>
-          <Indicador class="dashboard-indicator" title="Pessoas em redzone" subtitle="Neste momento" subtitle_printeable="No momento da emissão do relatório" :value="`${state.graphic_data?.indicadores?.total_pessoas !== undefined ?
+          <Indicador class="dashboard-indicator" title="Pessoas em redzone" subtitle="Neste momento"
+            subtitle_printeable="No momento da emissão do relatório" :value="`${state.graphic_data?.indicadores?.total_pessoas !== undefined ?
     state.graphic_data?.indicadores?.total_pessoas
     : '-'}`" />
           <Indicador class="dashboard-indicator" title="Total de entradas" subtitle="Desde o início" :value="`${state.graphic_data?.indicadores?.total_entradas !== undefined ?
@@ -198,7 +267,8 @@ onMounted(() => {
           <div class="dashboard-table-content">
             <v-data-table :headers="headers" :items="state.graphic_data?.tabela">
               <template v-slot:item.data="{ item }">
-                {{ `${new Date(item.data).toLocaleDateString('pt-BR')} às ${new Date(item.data).toLocaleTimeString('pt-BR')}` }}
+                {{ `${new Date(item.data).toLocaleDateString('pt-BR')} às ${new
+    Date(item.data).toLocaleTimeString('pt-BR')}` }}
               </template>
               <template v-slot:item.tipo="{ item }">
                 {{ item.tipo == 'entrada' ? 'Entrada' : 'Saída' }}
@@ -217,12 +287,13 @@ onMounted(() => {
               <tbody>
                 <tr class="dashboard-table-row" v-for="item in state.graphic_data?.tabela">
                   <td v-for="column in headers">
-                    {{ 
-                      column.key == 'data' ?
-                      `${new Date(item[column.key]).toLocaleDateString('pt-BR')} às ${new Date(item[column.key]).toLocaleTimeString('pt-BR')}`
-                      // @ts-ignore
-                      : item[column.key] 
-                    }}
+                    {{
+    column.key == 'data' ?
+      `${new Date(item[column.key]).toLocaleDateString('pt-BR')} às ${new
+        Date(item[column.key]).toLocaleTimeString('pt-BR')}`
+      // @ts-ignore
+      : item[column.key]
+  }}
                   </td>
                 </tr>
               </tbody>
@@ -274,6 +345,11 @@ onMounted(() => {
   margin-bottom: 24px
 }
 
+.dashboard-selector-container {
+  display: flex;
+  gap: 16px;
+}
+
 .dashboard-selector {
   width: 320px;
 }
@@ -322,6 +398,7 @@ onMounted(() => {
 }
 
 @media print {
+
   .dashboard-header,
   .dashboard-filters,
   .dashboard-download-btn,
@@ -359,7 +436,7 @@ onMounted(() => {
     gap: 0;
     background-color: transparent
   }
-  
+
   .dashboard-indicators {
     flex-direction: row;
     justify-content: center;
@@ -377,7 +454,8 @@ onMounted(() => {
     margin-top: 32px;
   }
 
-  .dashboard-title-printeable, .dashboard-title {
+  .dashboard-title-printeable,
+  .dashboard-title {
     font-size: 24px;
     color: var(--dark-blue);
   }
@@ -397,10 +475,11 @@ onMounted(() => {
   .dashboard-graphic {
     display: none;
   }
- 
+
   .dashboard-graphic-printeable {
     z-index: 1;
   }
+
   .dashboard-graphic-printeable-size {
     height: 370px;
   }
