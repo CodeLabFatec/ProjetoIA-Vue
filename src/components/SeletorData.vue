@@ -16,6 +16,10 @@ export default {
   props: {
     label: String,
     value: Object as PropType<Date | Date[] | null>,
+    width: {
+      type: Number,
+      default: 380
+    },
   },
   components: {
     SeletorDataModal
@@ -55,7 +59,7 @@ export default {
 </script>
 
 <template>
-  <button class="container" @click="updateModal()">
+  <button class="container" :style="{width: `${width}px`}"@click="updateModal()">
     <span class="label">{{ label }}</span>
     <span class="content">{{ presentDate(selectedDate) }}</span>
   </button>
@@ -70,8 +74,8 @@ export default {
 .container {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid var(--dark-blue);
-  padding-right: 16px;
+  border-bottom: 1px solid var(--light-gray);
+  margin-block: 8px;
 }
 
 .label {
@@ -79,6 +83,7 @@ export default {
 }
 
 .content {
-  padding: 12px;
+  padding: 8px;
+  padding-left: 4px;
 }
 </style>

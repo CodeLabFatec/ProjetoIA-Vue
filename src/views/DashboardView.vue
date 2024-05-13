@@ -14,6 +14,7 @@ import Area from '@/services/Area';
 import type IDashboardResponse from "@/interfaces/IDashboardResponse";
 import type IRedzone from '@/interfaces/IRedzone';
 import type IArea from '@/interfaces/IArea';
+import SeletorData from '@/components/SeletorData.vue';
 
 const state = ref({
   graphic_data: {} as IDashboardResponse,
@@ -21,6 +22,7 @@ const state = ref({
   areas: [] as IArea[],
   redzonesSelector: [] as string[],
   areasSelector: [] as string[],
+  selectedDates: [] as Date[],
   selectedRedzone: 'Todos',
   selectedArea: 'Todos',
   loading: false,
@@ -135,6 +137,14 @@ const handleAreaSelector = () => {
   getDashboard();
 }
 
+const handleDateSelector = (value: Date | Date[]) => {
+  if (Array.isArray(value)) {
+    state.value.selectedDates = value;
+  } else {
+    state.value.selectedDates = [value];
+  }
+}
+
 const exportContent = (source: 'table' | 'graphic') => {
   if (source == 'table') state.value.loadingExportTable = true;
   if (source == 'graphic') state.value.loadingExportGraphic = true;
@@ -210,6 +220,11 @@ onMounted(() => {
             <v-select color="#004488" label="Redzone" variant="underlined" :items="state.redzonesSelector"
               v-model="state.selectedRedzone" @update:model-value="handleRedzoneSelector"></v-select>
           </div>
+          <SeletorData 
+            :width="320"
+            :value="state.selectedDates.length == 1 ? state.selectedDates[0] : state.selectedDates"
+            @on-change="handleDateSelector"
+          />
         </div>
         <v-btn @click="exportPdf" variant="outlined" color="#004488" append-icon="mdi-download">Baixar relatório
           completo</v-btn>
@@ -347,6 +362,8 @@ onMounted(() => {
 
 .dashboard-selector-container {
   display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 16px;
 }
 
