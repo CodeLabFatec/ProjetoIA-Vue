@@ -22,7 +22,7 @@ const state = ref({
   areas: [] as IArea[],
   redzonesSelector: [] as string[],
   areasSelector: [] as string[],
-  selectedDates: [] as Date[],
+  selectedDates: [] as Date[] | undefined,
   selectedRedzone: 'Todos',
   selectedArea: 'Todos',
   loading: false,
@@ -145,6 +145,10 @@ const handleDateSelector = (value: Date | Date[]) => {
   }
 }
 
+const handleClearDate = () => {
+  state.value.selectedDates = []
+}
+
 const exportContent = (source: 'table' | 'graphic') => {
   if (source == 'table') state.value.loadingExportTable = true;
   if (source == 'graphic') state.value.loadingExportGraphic = true;
@@ -221,9 +225,11 @@ onMounted(() => {
               v-model="state.selectedRedzone" @update:model-value="handleRedzoneSelector"></v-select>
           </div>
           <SeletorData 
+          label="Data/Período"
             :width="320"
-            :value="state.selectedDates.length == 1 ? state.selectedDates[0] : state.selectedDates"
+            :value="state.selectedDates?.length == 1 ? state.selectedDates[0] : state.selectedDates"
             @on-change="handleDateSelector"
+            @on-clear="handleClearDate"
           />
         </div>
         <v-btn @click="exportPdf" variant="outlined" color="#004488" append-icon="mdi-download">Baixar relatório
@@ -362,13 +368,16 @@ onMounted(() => {
 
 .dashboard-selector-container {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
   gap: 16px;
+  /* border: 1px solid red; */
 }
 
 .dashboard-selector {
   width: 320px;
+  height: 50px;
+  /* border: 1px solid green */
 }
 
 .dashboard-graphic,
