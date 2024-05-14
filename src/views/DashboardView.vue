@@ -105,7 +105,12 @@ const getDashboard = () => {
   state.value.loading = true;
   Dashboard.getDashboard(
     state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined,
-    state.value.selectedArea !== 'Todos' ? Number(state.value.selectedArea.split('-')[0]) : undefined
+    state.value.selectedArea !== 'Todos' ? Number(state.value.selectedArea.split('-')[0]) : undefined,
+    state.value.selectedDates ? (
+      state.value.selectedDates.length > 1 ? 
+        state.value.selectedDates : 
+        state.value.selectedDates[0]
+    ) : undefined
   )
     .then(res => {
       if (res.data && res.status == 200) {
@@ -143,10 +148,12 @@ const handleDateSelector = (value: Date | Date[]) => {
   } else {
     state.value.selectedDates = [value];
   }
+  getDashboard();
 }
 
 const handleClearDate = () => {
-  state.value.selectedDates = []
+  state.value.selectedDates = [];
+  getDashboard();
 }
 
 const exportContent = (source: 'table' | 'graphic') => {
