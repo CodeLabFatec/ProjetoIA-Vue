@@ -34,6 +34,30 @@ class Area {
       return { status: 500, data: [] };
     }
   }
+
+  async delete(id: number): Promise<{ status: number }> {
+    try {
+      const { status } = await api.delete(`/area/${id}`);
+      return { status };
+    } catch (err) {
+      console.log(err);
+      return { status: 500 };
+    }
+  }
+
+  async update(area: {
+    id: number;
+    nome: string;
+    descricao: string;
+  }): Promise<{ status: number }> {
+    try {
+      const { status } = await api.put(`/area/${area.id}`, area);
+      return { status };
+    } catch (err) {
+      console.log(err);
+      return { status: 500 };
+    }
+  }
 }
 
 export default new Area();
