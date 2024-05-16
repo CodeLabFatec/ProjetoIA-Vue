@@ -252,14 +252,18 @@ onMounted(() => {
             <span>Baixar relatório últimos 7 dias em XLSX</span>
           </v-tooltip>
           <h1 class="dashboard-title">
-            Quantidade de pessoas por dia (últimos 7 dias)
+            Quantidade de pessoas por dia {{ !state.selectedDates || state.selectedDates.length == 0 ? '(últimos 7 dias)' : ''}}
           </h1>
-          <GraficoPessoasDia :loading="state.loading" :graphic_data="state.graphic_data?.grafico" />
+          <GraficoPessoasDia 
+          :mode="state.selectedRedzone !== 'Todos' 
+          ? 'byRedzone' 
+          : (state.selectedArea !== 'Todos' ? 'byArea' : 'total')" 
+          :loading="state.loading" :graphic_data="state.graphic_data?.grafico" />
         </div>
         <div class="dashboard-graphic-printeable-size"></div>
         <div class="dashboard-graphic-printeable">
           <h1 class="dashboard-title">
-            Quantidade de pessoas por dia (últimos 7 dias)
+            Quantidade de pessoas por dia {{ !state.selectedDates ? '(últimos 7 dias)' : ''}}
           </h1>
           <GraficoPessoasDia :loading="state.loading" :graphic_data="state.graphic_data?.grafico" />
         </div>

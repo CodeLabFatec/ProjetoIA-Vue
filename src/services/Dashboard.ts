@@ -20,24 +20,26 @@ class Dashboard {
       return item_date === date;
     });
 
-    console.log({filtered_list, list, date})
-
-    return filtered_list
+    return filtered_list;
   };
 
-  private convertRegistersInGraphicData = (list: IRegistroResponse[]) => {
-    let last_7days_list: string[] = [];
+  private convertRegistersInGraphicData = (list: IRegistroResponse[], period?: Date[] ) => {
+    let day_array: string[] = [];
 
-    for (let i = 0; i < 7; i++) {
-      let data = new Date();
-      data.setDate(data.getDate() - i);
-      let dataString = data.toISOString().split("T")[0];
-      last_7days_list.push(dataString);
+    if (!period || !period.length) {
+      for (let i = 0; i < 7; i++) {
+        let data = new Date();
+        data.setDate(data.getDate() - i);
+        let dataString = data.toISOString().split("T")[0];
+        day_array.push(dataString);
+      }
+    } else {
+      day_array = period.map(date => date.toISOString().split("T")[0]);
     }
 
-    const register_groupedby_date = last_7days_list.map((date) => ({
+    const register_groupedby_date = day_array.map((date) => ({
       data: date,
-      valor: this.filterRegisterByDate(list, date).length,
+      valor: this.filterRegisterByDate(list, date),
     }));
 
     return register_groupedby_date;
@@ -84,7 +86,8 @@ class Dashboard {
 
         const info_dashboard: IDashboardResponse = {
           grafico: this.convertRegistersInGraphicData(
-            entradas.data as IRegistroResponse[]
+            entradas.data as IRegistroResponse[],
+            date ? (Array.isArray(date) ? date : [date]) : []
           ),
           tabela: merged_entradas_saidas,
           indicadores: {

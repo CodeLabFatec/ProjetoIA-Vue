@@ -1,4 +1,6 @@
-export default interface IDiaPesoas {
+import type IRegistroResponse from "./IRegistroResponse"
+
+export interface IDiaPessoas {
   data: string,
-  valor: number,
+  valor: IRegistroResponse[],
 }
