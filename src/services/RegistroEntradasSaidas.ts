@@ -14,17 +14,23 @@ class RegistroEntradasSaidas {
       if (area_id) params.areaId = `${area_id}`;
       if (date) {
         if (Array.isArray(date)) {
-          params.dateStart = `${date[0].getFullYear()}-${date[0].getMonth().toString().padStart(2, '0')}-${date[0].getDate().toString().padStart(2, '0')}`;
-          params.dateEnd = `${date[1].getFullYear()}-${date[1].getMonth().toString().padStart(2, '0')}-${date[1].getDate().toString().padStart(2, '0')}`;
+          params.dateStart = `${date[0].getFullYear()}-${(date[0].getMonth() + 1).toString().padStart(2, '0')}-${date[0].getDate().toString().padStart(2, '0')}`;
+          params.dateEnd = `${date[1].getFullYear()}-${(date[1].getMonth() + 1).toString().padStart(2, '0')}-${date[1].getDate().toString().padStart(2, '0')}`;
         } else {
-          params.date = `${date.getFullYear()}-${date.getMonth().toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+          params.specificDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
         }
       }
-      console.log({params})
+
       const { data, status } = await api.get(
         `/${tipo}-redzone/people-by-redzone-filter`,
         { params }
       );
+
+      // for tests only
+      // const {data, status} = {
+      //   status: 200,
+      //   data: {peopleByRedZone: 24},
+      // }
 
       return {
         status,
@@ -47,10 +53,10 @@ class RegistroEntradasSaidas {
     if (area_id) params.areaId = `${area_id}`;
     if (date) {
       if (Array.isArray(date)) {
-        params.dateStart = `${date[0].getFullYear()}-${date[0].getMonth().toString().padStart(2, '0')}-${date[0].getDate().toString().padStart(2, '0')}`;
-        params.dateEnd = `${date[1].getFullYear()}-${date[1].getMonth().toString().padStart(2, '0')}-${date[1].getDate().toString().padStart(2, '0')}`;
+        params.dateStart = `${date[0].getFullYear()}-${(date[0].getMonth() + 1).toString().padStart(2, '0')}-${date[0].getDate().toString().padStart(2, '0')}`;
+        params.dateEnd = `${date[1].getFullYear()}-${(date[1].getMonth() + 1).toString().padStart(2, '0')}-${date[1].getDate().toString().padStart(2, '0')}`;
       } else {
-        params.date = `${date.getFullYear()}-${date.getMonth().toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        params.specificDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
       }
     }
     try {
