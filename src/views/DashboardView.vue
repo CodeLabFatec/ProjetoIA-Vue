@@ -22,7 +22,7 @@ const state = ref({
   areas: [] as IArea[],
   redzonesSelector: [] as string[],
   areasSelector: [] as string[],
-  selectedDates: [] as Date[] | undefined,
+  selectedDates: [] as string[] | undefined,
   selectedRedzone: 'Todos',
   selectedArea: 'Todos',
   loading: false,
@@ -106,10 +106,10 @@ const getDashboard = () => {
   Dashboard.getDashboard(
     state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined,
     state.value.selectedArea !== 'Todos' ? Number(state.value.selectedArea.split('-')[0]) : undefined,
-    state.value.selectedDates ? (
+    state.value.selectedDates?.length ? (
       state.value.selectedDates.length > 1 ? 
-        state.value.selectedDates : 
-        state.value.selectedDates[0]
+        state.value.selectedDates.map(item => new Date(item)) : 
+        new Date(state.value.selectedDates[0])
     ) : undefined
   )
     .then(res => {
@@ -144,9 +144,9 @@ const handleAreaSelector = () => {
 
 const handleDateSelector = (value: Date | Date[]) => {
   if (Array.isArray(value)) {
-    state.value.selectedDates = value;
+    state.value.selectedDates = value.map(item => `${item.getFullYear()}-${item.getMonth() + 1}-${item.getDate()}`);
   } else {
-    state.value.selectedDates = [value];
+    state.value.selectedDates = [`${value.getFullYear()}-${value.getMonth() + 1}-${value.getDate()}`];
   }
   getDashboard();
 }
@@ -234,8 +234,8 @@ onMounted(() => {
           <SeletorData 
           label="Data/Período"
             :width="320"
-            :value="state.selectedDates?.length == 1 ? state.selectedDates[0] : state.selectedDates"
-            @on-change="handleDateSelector"
+            :value="state.selectedDates?.length == 1 ? new Date(state.selectedDates[0]) : state.selectedDates?.map(item => new Date(item))"
+            @on-change="handleDateSelector($event)"
             @on-clear="handleClearDate"
           />
         </div>
@@ -256,8 +256,8 @@ onMounted(() => {
           </h1>
           <GraficoPessoasDia 
           :mode="state.selectedRedzone !== 'Todos' 
-          ? 'byRedzone' 
-          : (state.selectedArea !== 'Todos' ? 'byArea' : 'total')" 
+          ? 'total' 
+          : (state.selectedArea == 'Todos' ? 'byArea' : 'byRedzone')" 
           :loading="state.loading" :graphic_data="state.graphic_data?.grafico" />
         </div>
         <div class="dashboard-graphic-printeable-size"></div>
