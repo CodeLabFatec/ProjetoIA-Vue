@@ -23,7 +23,7 @@ const state = ref({
 onMounted(() => {
   if (route_data.params.id) {
     state.value.loading = true;
-    Redzone.getRedzonesByID(Number(route_data.params.id))
+    Area.getByID(Number(route_data.params.id))
       .then(res => {
         if (res.status == 200 && res.data) {
           state.value.nome = res.data.nome;
@@ -48,7 +48,7 @@ const onSubmit = () => {
   }
 
   state.value.loading = true;
-  Redzone[route_data.params.id ? 'update' : 'create']({
+  Area[route_data.params.id ? 'update' : 'create']({
     id: Number(route_data.params.id),
     nome: state.value.nome,
     descricao: state.value.descricao
@@ -95,13 +95,13 @@ const clearError = () => {
 </script>
 
 <template>
-  <main class="redzonesform">
+  <main class="areaform">
     <LoadingBar :visible="state.loading" />
-    <div class="redzonesform-titulo-container">
-      <div class="redzonesform-backbtn">
+    <div class="areaform-titulo-container">
+      <div class="areaform-backbtn">
         <v-btn @click="goBack" variant="text" icon="mdi-arrow-left" color="#004488"></v-btn>
       </div>
-      <Titulo :content="route_data.params.id ? 'Edição de Redzone' : 'Cadastro de RedZone'" />
+      <Titulo :content="route_data.params.id ? 'Edição de Área' : 'Cadastro de Área'" />
     </div>
     <form @submit.prevent="onSubmit" class="form">
       <div>
@@ -112,13 +112,13 @@ const clearError = () => {
         <v-textarea :readonly="state.loading" class="desc-field" variant="outlined" label="Descrição"
           v-model="state.descricao" auto-grow></v-textarea>
       </div>
-      <div class="redzonesform-containerbtn">
+      <div class="areaform-containerbtn">
         <Botao :disabled="state.loading" :content="route_data.params.id ? 'Editar' : 'Cadastrar'" />
       </div>
     </form>
   </main>
   <v-snackbar color="green" v-model="state.success">
-    Redzone {{ route_data.params.id ? 'editada' : 'criada' }} com sucesso! Retornando à tela de listagem...
+    Área {{ route_data.params.id ? 'editada' : 'criada' }} com sucesso! Retornando à tela de listagem...
   </v-snackbar>
   <v-snackbar color="red" v-model="state.error">
     Um erro interno aconteceu. Tente novamente mais tarde.
@@ -126,13 +126,13 @@ const clearError = () => {
 </template>
 
 <style scoped>
-.redzonesform-backbtn {
+.areaform-backbtn {
   position: absolute;
   top: 74px;
   left: 0;
 }
 
-.redzonesform {
+.areaform {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -140,12 +140,12 @@ const clearError = () => {
   margin-bottom: 24px;
 }
 
-.redzonesform-titulo-container {
+.areaform-titulo-container {
   display: flex;
   width: 100%;
 }
 
-.redzonesform .form {
+.areaform .form {
   display: flex;
   flex-direction: column;
   margin-inline: 12px;
@@ -154,7 +154,7 @@ const clearError = () => {
   gap: 12px;
 }
 
-.redzonesform-containerbtn {
+.areaform-containerbtn {
   display: flex;
   flex-direction: row-reverse;
 }

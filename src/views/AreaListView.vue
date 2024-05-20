@@ -33,9 +33,10 @@ const getAreas = () => {
     .then(res => {
       const { status, data } = res;
       if (status == 200) {
+        console.log(data)
         state.value.items = data.map(item => ({
           ...item,
-          data: new Date(item.data).toLocaleDateString('pt-BR'),
+          status_str: item.status == true ? "Ativo" : "Inativo"
         }));
       } else {
         state.value.error = true;
@@ -68,6 +69,10 @@ const headers = [
     key: 'descricao',
     title: 'Descrição',
   },
+  {
+    key: 'status_str',
+    title: 'Status',
+  },
 ];
 
 const updateDeleteModal = (new_state: boolean) => {
@@ -88,8 +93,9 @@ const confirmDeleteItem = () => {
     state.value.areaModal = false;
     state.value.loading = true;
     updateDeleteModal(false);
-    Area.delete(state.value.selectedArea.id)
+    Area.deleteById(state.value.selectedArea.id as number)
       .then(res => {
+        console.log(res)
         if (res.status == 204) {
           state.value.deleteSuccess = true;
           getAreas();
@@ -125,7 +131,7 @@ const onSelect = (option: string, item: IArea) => {
     case 'Editar':
       goToUpdate(item.id);
       break;
-    case 'Excluir':
+    case 'Inativar':
       askDeleteItem(item);
       break;
   }
@@ -167,14 +173,14 @@ const onSelect = (option: string, item: IArea) => {
     :area="state.selectedArea" 
     @on-update-modal="updateAreaModal($event)" 
     @on-delete-request="askDeleteItem(state.selectedArea)"
-    @on-update-request="goToUpdate(state.selectedArea.id)"
+    @on-update-request="goToUpdate(state.selectedArea?.id)"
   />
 
   <v-snackbar color="red" v-model="state.deleteFailed">
-    Não foi possível deletar a área. Tente novamente mais tarde.
+    Não foi possível inativar a área. Tente novamente mais tarde.
   </v-snackbar>
   <v-snackbar color="green" v-model="state.deleteSuccess">
-    Área excluída com sucesso.
+    Área inativada com sucesso.
   </v-snackbar>
 </template>
 
