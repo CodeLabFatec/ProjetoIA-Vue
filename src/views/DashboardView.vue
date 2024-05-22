@@ -299,6 +299,18 @@ onMounted(() => {
         Redzone: <b>{{ state.selectedRedzone == 'Todos' ? 'Todos' : `${state.selectedRedzone.split('-')[1]} [ ID:
           ${state.selectedRedzone.split('-')[0]} ]` }}</b>
       </div>
+      <div class="dashboard-header-printeable-subtitle">
+        Área: <b>{{ state.selectedArea == 'Todos' && state.selectedRedzone == 'Todos' ? 'Todas' : (
+          state.selectedArea !== 'Todos' ?
+          `${state.selectedArea.split('-')[1]} [ ID: ${state.selectedArea.split('-')[0]} ]`
+        : `${state.redzones.find(redzone => Number(state.selectedRedzone.split('-')[0]) == redzone.id)?.area.nome} [ID: ${state.redzones.find(redzone => Number(state.selectedRedzone.split('-')[0]) == redzone.id)?.area.id}]`) }}</b>
+      </div>
+      <div v-if="state.selectedDates !== undefined && state.selectedDates.length == 1" class="dashboard-header-printeable-subtitle">
+        Data: <b>{{ `${new Date(state.selectedDates[0]).toLocaleDateString('pt-BR')}` }}</b>
+      </div>
+      <div v-if="state.selectedDates !== undefined && state.selectedDates.length > 1" class="dashboard-header-printeable-subtitle">
+        Período: <b>{{ `${new Date(state.selectedDates[0]).toLocaleDateString('pt-BR')} - ${new Date(state.selectedDates[1]).toLocaleDateString('pt-BR')}` }}</b>
+      </div>
     </div>
     <div class="dashboard-header">
       <Titulo style="margin: 24px auto;" content="Dashboard" />
