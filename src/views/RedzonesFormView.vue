@@ -7,6 +7,9 @@ import Botao from "@/components/Botao.vue";
 
 import Redzone from "@/services/Redzone";
 import LoadingBar from "@/components/LoadingBar.vue";
+import type IArea from "@/interfaces/IArea";
+import Area from "@/services/Area";
+import { watch } from "vue";
 
 const router = useRouter();
 const route_data = useRoute();
@@ -18,9 +21,17 @@ const state = ref({
   error: false,
   success: false,
   invalid: false,
+  areas: [] as IArea[],
+  selectedArea: "Selecione...",
+  areasSelector: [] as string[],
 });
 
 onMounted(() => {
+  Area.getAreas().then((r) => {
+    if (r.status !== 200 || r.data.length === 0) return;
+    state.value.areas = r.data;
+  });
+
   if (route_data.params.id) {
     state.value.loading = true;
     Redzone.getRedzonesByID(Number(route_data.params.id))
@@ -28,6 +39,8 @@ onMounted(() => {
         if (res.status == 200 && res.data) {
           state.value.nome = res.data.nome;
           state.value.descricao = res.data.descricao;
+          const area = res.data.area;
+          state.value.selectedArea = `${area.id} - ${area.nome}`;
         } else {
           state.value.error = true;
         }
@@ -41,6 +54,19 @@ onMounted(() => {
   }
 });
 
+const updateSelector = (list: "areasSelector", items: IArea[]) => {
+  state.value[list] = [...items.map((item) => `${item.id} - ${item.nome}`)];
+};
+
+watch(
+  () => [state.value.areas],
+  (newValue) => {
+    const [newAreas] = newValue;
+
+    updateSelector("areasSelector", newAreas);
+  }
+);
+
 const onSubmit = () => {
   if (!state.value.nome) {
     state.value.invalid = true;
@@ -48,10 +74,13 @@ const onSubmit = () => {
   }
 
   state.value.loading = true;
+  const areaId = state.value.selectedArea.split(" -")[0];
+
   Redzone[route_data.params.id ? "update" : "create"]({
     id: Number(route_data.params.id),
     nome: state.value.nome,
     descricao: state.value.descricao,
+    areaId: Number(areaId),
   })
     .then((res) => {
       if (res.status !== 201 && res.status !== 200) {
@@ -73,6 +102,8 @@ const onSubmit = () => {
     });
 };
 
+const handleAreaSelector = () => {};
+
 const reset = () => {
   state.value = {
     invalid: false,
@@ -81,6 +112,9 @@ const reset = () => {
     loading: false,
     nome: "",
     success: false,
+    areas: [],
+    selectedArea: "",
+    areasSelector: [],
   };
 };
 
@@ -131,6 +165,16 @@ const clearError = () => {
           v-model="state.descricao"
           auto-grow
         ></v-textarea>
+      </div>
+      <div>
+        <v-select
+          color="#004488"
+          label="Área"
+          variant="underlined"
+          :items="state.areasSelector"
+          v-model="state.selectedArea"
+          @update:model-value="handleAreaSelector"
+        ></v-select>
       </div>
       <div class="redzonesform-containerbtn">
         <Botao

@@ -6,4 +6,6 @@ export default interface IRedzone {
   descricao: string;
   data: string;
   area: IArea;
+  status: boolean;
+  status_str: string;
 }
