@@ -1,8 +1,8 @@
 <script lang="ts">
-import Botao from './Botao.vue';
+import Botao from "./Botao.vue";
 
-import type { PropType } from 'vue';
-import type IArea from '@/interfaces/IArea';
+import type { PropType } from "vue";
+import type IArea from "@/interfaces/IArea";
 
 export default {
   props: {
@@ -15,30 +15,39 @@ export default {
       default: undefined,
     },
   },
-  emits: ['onDeleteRequest', 'onUpdateRequest', 'OnUpdateModal'],
+  emits: [
+    "onDeleteRequest",
+    "onUpdateRequest",
+    "OnUpdateModal",
+    "onActivateRequest",
+  ],
   data() {
     return {
       dialog: this.visible,
-    }
+    };
   },
   watch: {
     visible(newVal: boolean) {
       this.dialog = newVal;
-    }
+    },
   },
   components: {
     Botao,
   },
-}
+};
 </script>
 
 <template>
-  <v-dialog width="auto" v-model="dialog" @update:model-value="$emit('OnUpdateModal', $event)">
+  <v-dialog
+    width="auto"
+    v-model="dialog"
+    @update:model-value="$emit('OnUpdateModal', $event)"
+  >
     <v-card max-width="600px">
       <div class="areamodal-title">
         <v-card-title class="d-flex justify-space-between align-center">
           <div>
-            {{ $props.area?.nome || '' }}
+            {{ $props.area?.nome || "" }}
           </div>
           <v-btn
             icon="mdi-close"
@@ -52,7 +61,18 @@ export default {
         {{ $props.area?.descricao }}
       </div>
       <div class="areamodal-btn-container">
-        <Botao content="Excluir" color="alert" @click="$emit('onDeleteRequest')" />
+        <Botao
+          v-if="$props.area?.status"
+          content="Inativar"
+          color="alert"
+          @click="$emit('onDeleteRequest')"
+        />
+        <Botao
+          v-if="!$props.area?.status"
+          content="Ativar"
+          color="alert"
+          @click="$emit('onActivateRequest')"
+        />
         <Botao content="Editar" @click="$emit('onUpdateRequest')" />
       </div>
     </v-card>
@@ -60,7 +80,7 @@ export default {
 </template>
 
 <style scoped>
-.areamodal-title{
+.areamodal-title {
   padding-inline: 4px;
 }
 
@@ -73,6 +93,6 @@ export default {
 
 .areamodal-desc {
   padding-inline: 22px;
-  text-align: justify
+  text-align: justify;
 }
 </style>
