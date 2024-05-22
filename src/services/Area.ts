@@ -4,7 +4,7 @@ import api from "./api";
 class Area {
   async getAreas(): Promise<{ status: number; data: IArea[] }> {
     try {
-      const { data, status } = await api.get('/area');
+      const { data, status } = await api.get("/area");
 
       return { data, status };
     } catch (err) {
@@ -13,9 +13,7 @@ class Area {
     }
   }
 
-  async getByID(
-    id: number
-  ): Promise<{ data?: IArea; status: number }> {
+  async getByID(id: number): Promise<{ data?: IArea; status: number }> {
     try {
       const { data, status } = await api.get(`/area/${id}`);
       return { data, status };
@@ -58,6 +56,15 @@ class Area {
       return { status };
     } catch (err) {
       console.log(err);
+      return { status: 500 };
+    }
+  }
+
+  async activateById(id: number): Promise<{ status: number }> {
+    try {
+      const { status } = await api.put(`/area/activate/${id}`);
+      return { status };
+    } catch (err) {
       return { status: 500 };
     }
   }
