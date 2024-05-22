@@ -316,7 +316,7 @@ onMounted(() => {
           </div>
           <SeletorData 
           label="Data/Período"
-            :width="320"
+            :width="220"
             :value="state.selectedDates?.length == 1 ? new Date(state.selectedDates[0]) : state.selectedDates?.map(item => new Date(item))"
             @on-change="handleDateSelector($event)"
             @on-clear="handleClearDate"
@@ -357,13 +357,21 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Indicadores
           </h1>
-          <Indicador class="dashboard-indicator" title="Pessoas em redzone" subtitle="Neste momento"
-            subtitle_printeable="No momento da emissão do relatório" :value="`${state.graphic_data?.indicadores?.total_pessoas !== undefined ?
-    state.graphic_data?.indicadores?.total_pessoas
-    : '-'}`" />
-          <Indicador class="dashboard-indicator" title="Total de entradas" subtitle="Desde o início" :value="`${state.graphic_data?.indicadores?.total_entradas !== undefined ?
-    state.graphic_data?.indicadores?.total_entradas
-    : '-'}`" />
+          <div class="dashboard-indicators-container">
+            <Indicador 
+              class="dashboard-indicator" 
+              title="Pessoas em redzone" 
+              subtitle="Neste momento"
+              subtitle_printeable="No momento da emissão do relatório" 
+              :value="`${state.graphic_data?.indicadores?.total_pessoas !== undefined ? state.graphic_data?.indicadores?.total_pessoas : '-'}`" 
+            />
+            <Indicador 
+              class="dashboard-indicator" 
+              title="Total de entradas" 
+              subtitle="Desde o início" 
+              :value="`${state.graphic_data?.indicadores?.total_entradas !== undefined ? state.graphic_data?.indicadores?.total_entradas : '-'}`" 
+            />
+          </div>
         </div>
       </div>
       <hr class="dashboard-hr" />
@@ -436,6 +444,7 @@ onMounted(() => {
 
 .dashboard-main {
   margin-top: -12px;
+  overflow-x: hidden;
 }
 
 .dashboard-content {
@@ -469,7 +478,7 @@ onMounted(() => {
 }
 
 .dashboard-selector {
-  width: 320px;
+  width: 220px;
   height: 50px;
   /* border: 1px solid green */
 }
@@ -515,6 +524,65 @@ onMounted(() => {
   position: absolute;
   top: 0;
   right: 0;
+}
+
+.dashboard-indicators-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 1050px) {
+  .dashboard-selector-container {
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 824px) {
+  .dashboard-filters {
+    gap: 24px;
+  }
+
+  .dashboard-filters, .dashboard-selector-container, .dashboard-content-row {
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .dashboard-content-row {
+    margin-top: 24px;
+    gap: 8px;
+  }
+
+  .dashboard-indicators {
+    width: 100%;
+    /* border: 1px solid red; */
+    margin: auto;
+    gap: 0;
+  }
+
+  .dashboard-indicators .dashboard-title {
+    margin: 0;
+    padding: 0;
+    
+  }
+  
+  .dashboard-indicators-container {
+    width: 100%;
+    flex-direction: row;
+    align-items: space-around;
+  }
+
+  .dashboard-graphic .dashboard-title {
+    margin-bottom: 48px;
+  }
+
+
+  .dashboard-graphic .dashboard-download-btn {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 48px;
+  }
 }
 
 @media print {
