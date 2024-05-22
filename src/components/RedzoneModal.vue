@@ -1,8 +1,8 @@
 <script lang="ts">
-import Botao from './Botao.vue';
+import Botao from "./Botao.vue";
 
-import type { PropType } from 'vue';
-import type IRedzone from '@/interfaces/IRedzone';
+import type { PropType } from "vue";
+import type IRedzone from "@/interfaces/IRedzone";
 
 export default {
   props: {
@@ -15,30 +15,39 @@ export default {
       default: undefined,
     },
   },
-  emits: ['onDeleteRequest', 'onUpdateRequest', 'OnUpdateModal'],
+  emits: [
+    "onDeleteRequest",
+    "onUpdateRequest",
+    "OnUpdateModal",
+    "onActivateRequest",
+  ],
   data() {
     return {
       dialog: this.visible,
-    }
+    };
   },
   watch: {
     visible(newVal: boolean) {
       this.dialog = newVal;
-    }
+    },
   },
   components: {
     Botao,
   },
-}
+};
 </script>
 
 <template>
-  <v-dialog width="auto" v-model="dialog" @update:model-value="$emit('OnUpdateModal', $event)">
+  <v-dialog
+    width="auto"
+    v-model="dialog"
+    @update:model-value="$emit('OnUpdateModal', $event)"
+  >
     <v-card max-width="600px">
       <div class="redzonemodal-title">
         <v-card-title class="d-flex justify-space-between align-center">
           <div>
-            {{ $props.redzone?.nome || '' }}
+            {{ $props.redzone?.nome || "" }}
           </div>
           <v-btn
             icon="mdi-close"
@@ -55,7 +64,18 @@ export default {
         {{ $props.redzone?.descricao }}
       </div>
       <div class="redzonemodal-btn-container">
-        <Botao content="Excluir" color="alert" @click="$emit('onDeleteRequest')" />
+        <Botao
+          v-if="$props.redzone?.status"
+          content="Inativar"
+          color="alert"
+          @click="$emit('onDeleteRequest')"
+        />
+        <Botao
+          v-if="!$props.redzone?.status"
+          content="Ativar"
+          color="alert"
+          @click="$emit('onActivateRequest')"
+        />
         <Botao content="Editar" @click="$emit('onUpdateRequest')" />
       </div>
     </v-card>
@@ -63,7 +83,7 @@ export default {
 </template>
 
 <style scoped>
-.redzonemodal-title{
+.redzonemodal-title {
   padding-inline: 4px;
 }
 
@@ -76,6 +96,6 @@ export default {
 
 .redzonemodal-desc {
   padding-inline: 22px;
-  text-align: justify
+  text-align: justify;
 }
 </style>

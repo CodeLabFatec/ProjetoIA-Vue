@@ -36,7 +36,6 @@ const getAreas = () => {
     .then((res) => {
       const { status, data } = res;
       if (status == 200) {
-        console.log(data);
         state.value.items = data.map((item) => ({
           ...item,
           status_str: item.status == true ? "Ativo" : "Inativo",
@@ -163,7 +162,6 @@ const onSelect = (option: string, item: IArea) => {
     case "Detalhes":
       state.value.areaModal = true;
       state.value.selectedArea = item;
-      console.log(state.value.selectedArea);
       break;
     case "Editar":
       goToUpdate(item.id);
@@ -212,6 +210,34 @@ const onSelect = (option: string, item: IArea) => {
             :items="['Detalhes', 'Editar', item.status ? 'Inativar' : 'Ativar']"
             @on-select="onSelect($event, item)"
           />
+        </template>
+        <template v-slot:item.status_str="{ item }">
+          <div v-if="item.status">
+            <p
+              style="
+                color: white;
+                background-color: green;
+                width: 50px;
+                text-align: center;
+                border-radius: 3px;
+              "
+            >
+              Ativo
+            </p>
+          </div>
+          <div v-if="!item.status">
+            <p
+              style="
+                color: white;
+                background-color: red;
+                width: 50px;
+                text-align: center;
+                border-radius: 3px;
+              "
+            >
+              Inativo
+            </p>
+          </div>
         </template>
       </v-data-table>
     </div>
