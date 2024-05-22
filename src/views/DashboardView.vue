@@ -28,9 +28,12 @@ const state = ref({
   loading: false,
   error: false,
   errorExport: false,
+  errorRefresh: false,
+  errorRefreshSnack: false,
   successExport: false,
   loadingExportTable: false,
   loadingExportGraphic: false,
+  refresh: true,
 });
 
 const headers = [
@@ -61,6 +64,81 @@ watch(() => [state.value.areas, state.value.redzones], newValue => {
   updateSelector('areasSelector', newAreas);
   updateSelector('redzonesSelector', newRedzones);
 });
+
+watch(() => [state.value.refresh], newValue => {
+  setTimeout(() => {
+    if (state.value.refresh) {
+      if (!state.value.selectedDates?.length && !state.value.errorRefresh) refreshDashboard();
+      state.value.refresh = false;
+    } else {
+      state.value.refresh = true;
+    }
+  }, 5000);
+})
+
+const refreshDashboard = () => {
+  Dashboard.refreshDashboard({
+    redzone: state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined,
+    area: state.value.selectedArea !== 'Todos' ? Number(state.value.selectedArea.split('-')[0]) : undefined,
+  })
+  .then(res => {
+    if (res.status !== 200) {
+      state.value.errorRefresh = true;
+      state.value.errorRefreshSnack = true;
+      return;
+    }
+
+    const {entradas, saidas} = res.data;
+
+    // infos para tabela
+    const registros_pre = [
+      ...entradas.map(item => ({...item, tipo: 'entrada'})),
+      ...saidas.map(item => ({...item, tipo: 'saida'}))
+    ].sort((a, b) => {
+      let data_a = new Date(a.data);
+      let data_b = new Date(b.data);
+
+      return data_b.getTime() - data_a.getTime();
+    });
+
+    const registros_all = [
+      ...registros_pre,
+      ...state.value.graphic_data.tabela,
+    ];
+
+    // infos para gráfico
+    const info_grafico_old = state.value.graphic_data.grafico
+
+    const info_grafico = [
+      ...info_grafico_old.slice(0, -1),
+      {
+        data: info_grafico_old[info_grafico_old.length - 1].data,
+        valor: [
+          ...entradas,
+          ...info_grafico_old[info_grafico_old.length - 1].valor
+        ],
+      }
+    ];
+
+    // infos para os indicadores
+    const total_pessoas = state.value.graphic_data.indicadores.total_pessoas + (
+      entradas.length - saidas.length
+    );
+    const total_entradas = state.value.graphic_data.indicadores.total_entradas + entradas.length;
+
+    state.value.graphic_data = {
+      grafico: info_grafico,
+      indicadores: {
+        total_entradas,
+        total_pessoas,
+      },
+      tabela: registros_all,
+    } as IDashboardResponse;
+  })
+  .catch(err => {
+    console.log(err);
+  });
+}
 
 const getRedzones = (area_id?: number) => {
   state.value.loading = true;
@@ -189,6 +267,8 @@ onMounted(() => {
   getDashboard();
   getRedzones();
   getAreas();
+
+  state.value.refresh = false;
 });
 
 </script>
@@ -196,6 +276,9 @@ onMounted(() => {
 <template>
   <img class="dashboard-header-print" src="../assets/header-printeable.png">
   <LoadingBar :visible="state.loading" />
+  <v-snackbar class="dashboard-snackbar" color="red" v-model="state.errorRefreshSnack">
+    Erro ao atualizar Dashboard. Atualize a página (F5) ou tente novamente mais tarde.
+  </v-snackbar>
   <v-snackbar class="dashboard-snackbar" color="red" v-model="state.error">
     Um erro interno aconteceu. Tente novamente mais tarde.
   </v-snackbar>
