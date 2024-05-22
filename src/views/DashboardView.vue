@@ -360,7 +360,13 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Quantidade de pessoas por dia {{ !state.selectedDates ? '(últimos 7 dias)' : ''}}
           </h1>
-          <GraficoPessoasDia :loading="state.loading" :graphic_data="state.graphic_data?.grafico" />
+          <GraficoPessoasDia 
+            :mode="state.selectedRedzone !== 'Todos' 
+              ? 'total' 
+              : (state.selectedArea == 'Todos' ? 'byArea' : 'byRedzone')" 
+            :loading="state.loading" 
+            :graphic_data="state.graphic_data?.grafico"
+          />
         </div>
         <h1 class="dashboard-title-printeable">
           Indicadores
