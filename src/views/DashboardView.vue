@@ -28,9 +28,12 @@ const state = ref({
   loading: false,
   error: false,
   errorExport: false,
+  errorRefresh: false,
+  errorRefreshSnack: false,
   successExport: false,
   loadingExportTable: false,
   loadingExportGraphic: false,
+  refresh: true,
 });
 
 const headers = [
@@ -61,6 +64,87 @@ watch(() => [state.value.areas, state.value.redzones], newValue => {
   updateSelector('areasSelector', newAreas);
   updateSelector('redzonesSelector', newRedzones);
 });
+
+watch(() => [state.value.refresh], newValue => {
+  setTimeout(() => {
+    if (state.value.refresh) {
+      if (!state.value.selectedDates?.length && !state.value.errorRefresh) refreshDashboard();
+      state.value.refresh = false;
+    } else {
+      state.value.refresh = true;
+    }
+  }, 5000);
+})
+
+watch(() => [state.value.graphic_data.tabela], newValue => console.log(newValue))
+
+const refreshDashboard = () => {
+  Dashboard.refreshDashboard({
+    redzone: state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined,
+    area: state.value.selectedArea !== 'Todos' ? Number(state.value.selectedArea.split('-')[0]) : undefined,
+  })
+  .then(res => {
+    if (res.status !== 200) {
+      state.value.errorRefresh = true;
+      state.value.errorRefreshSnack = true;
+      return;
+    }
+
+    if (!(res.data.entradas.length || res.data.saidas.length)) {
+      return;
+    }
+
+    const {entradas, saidas} = res.data;
+
+    // infos para tabela
+    const registros_pre = [
+      ...entradas.map(item => ({...item, tipo: 'entrada'})),
+      ...saidas.map(item => ({...item, tipo: 'saida'}))
+    ].sort((a, b) => {
+      let data_a = new Date(a.data);
+      let data_b = new Date(b.data);
+
+      return data_b.getTime() - data_a.getTime();
+    });
+
+    const registros_all = [
+      ...registros_pre,
+      ...state.value.graphic_data.tabela,
+    ];
+
+    // infos para gráfico
+    const info_grafico_old = state.value.graphic_data.grafico
+
+    const info_grafico = [
+      ...info_grafico_old.slice(0, -1),
+      {
+        data: info_grafico_old[info_grafico_old.length - 1].data,
+        valor: [
+          ...entradas,
+          ...info_grafico_old[info_grafico_old.length - 1].valor
+        ],
+      }
+    ];
+
+    // infos para os indicadores
+    const total_pessoas = state.value.graphic_data.indicadores.total_pessoas + (
+      entradas.length - saidas.length
+    );
+    const total_entradas = state.value.graphic_data.indicadores.total_entradas + entradas.length;
+
+    state.value.graphic_data = {
+      grafico: info_grafico,
+      indicadores: {
+        total_entradas,
+        total_pessoas,
+      },
+      tabela: registros_all,
+    } as IDashboardResponse;
+  })
+  .catch(err => {
+    console.log(err);
+  });
+}
 
 const getRedzones = (area_id?: number) => {
   state.value.loading = true;
@@ -189,6 +273,8 @@ onMounted(() => {
   getDashboard();
   getRedzones();
   getAreas();
+
+  state.value.refresh = false;
 });
 
 </script>
@@ -196,6 +282,9 @@ onMounted(() => {
 <template>
   <img class="dashboard-header-print" src="../assets/header-printeable.png">
   <LoadingBar :visible="state.loading" />
+  <v-snackbar class="dashboard-snackbar" color="red" v-model="state.errorRefreshSnack">
+    Erro ao atualizar Dashboard. Atualize a página (F5) ou tente novamente mais tarde.
+  </v-snackbar>
   <v-snackbar class="dashboard-snackbar" color="red" v-model="state.error">
     Um erro interno aconteceu. Tente novamente mais tarde.
   </v-snackbar>
@@ -216,6 +305,18 @@ onMounted(() => {
         Redzone: <b>{{ state.selectedRedzone == 'Todos' ? 'Todos' : `${state.selectedRedzone.split('-')[1]} [ ID:
           ${state.selectedRedzone.split('-')[0]} ]` }}</b>
       </div>
+      <div class="dashboard-header-printeable-subtitle">
+        Área: <b>{{ state.selectedArea == 'Todos' && state.selectedRedzone == 'Todos' ? 'Todas' : (
+          state.selectedArea !== 'Todos' ?
+          `${state.selectedArea.split('-')[1]} [ ID: ${state.selectedArea.split('-')[0]} ]`
+        : `${state.redzones.find(redzone => Number(state.selectedRedzone.split('-')[0]) == redzone.id)?.area.nome} [ID: ${state.redzones.find(redzone => Number(state.selectedRedzone.split('-')[0]) == redzone.id)?.area.id}]`) }}</b>
+      </div>
+      <div v-if="state.selectedDates !== undefined && state.selectedDates.length == 1" class="dashboard-header-printeable-subtitle">
+        Data: <b>{{ `${new Date(state.selectedDates[0]).toLocaleDateString('pt-BR')}` }}</b>
+      </div>
+      <div v-if="state.selectedDates !== undefined && state.selectedDates.length > 1" class="dashboard-header-printeable-subtitle">
+        Período: <b>{{ `${new Date(state.selectedDates[0]).toLocaleDateString('pt-BR')} - ${new Date(state.selectedDates[1]).toLocaleDateString('pt-BR')}` }}</b>
+      </div>
     </div>
     <div class="dashboard-header">
       <Titulo style="margin: 24px auto;" content="Dashboard" />
@@ -233,7 +334,7 @@ onMounted(() => {
           </div>
           <SeletorData 
           label="Data/Período"
-            :width="320"
+            :width="230"
             :value="state.selectedDates?.length == 1 ? new Date(state.selectedDates[0]) : state.selectedDates?.map(item => new Date(item))"
             @on-change="handleDateSelector($event)"
             @on-clear="handleClearDate"
@@ -244,7 +345,7 @@ onMounted(() => {
       </div>
       <div class="dashboard-content-row">
         <div class="dashboard-graphic">
-          <v-tooltip bottom>
+          <v-tooltip bottom v-if="(!state.selectedDates || state.selectedDates.length == 0) && state.selectedArea == 'Todos'">
             <template v-slot:activator="{ props }">
               <v-btn class="dashboard-download-btn" icon="mdi-download" variant="text" color="#004488" v-bind="props"
                 :loading="state.loadingExportGraphic" @click="exportContent('graphic')"></v-btn>
@@ -265,7 +366,13 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Quantidade de pessoas por dia {{ !state.selectedDates ? '(últimos 7 dias)' : ''}}
           </h1>
-          <GraficoPessoasDia :loading="state.loading" :graphic_data="state.graphic_data?.grafico" />
+          <GraficoPessoasDia 
+            :mode="state.selectedRedzone !== 'Todos' 
+              ? 'total' 
+              : (state.selectedArea == 'Todos' ? 'byArea' : 'byRedzone')" 
+            :loading="state.loading" 
+            :graphic_data="state.graphic_data?.grafico"
+          />
         </div>
         <h1 class="dashboard-title-printeable">
           Indicadores
@@ -274,13 +381,24 @@ onMounted(() => {
           <h1 class="dashboard-title">
             Indicadores
           </h1>
-          <Indicador class="dashboard-indicator" title="Pessoas em redzone" subtitle="Neste momento"
-            subtitle_printeable="No momento da emissão do relatório" :value="`${state.graphic_data?.indicadores?.total_pessoas !== undefined ?
-    state.graphic_data?.indicadores?.total_pessoas
-    : '-'}`" />
-          <Indicador class="dashboard-indicator" title="Total de entradas" subtitle="Desde o início" :value="`${state.graphic_data?.indicadores?.total_entradas !== undefined ?
-    state.graphic_data?.indicadores?.total_entradas
-    : '-'}`" />
+          <div class="dashboard-indicators-container">
+            <Indicador 
+              class="dashboard-indicator" 
+              title="Pessoas em redzone" 
+              :subtitle="state.selectedDates?.length ? 'Na data/período selecionado' : 'Neste momento'"
+              :subtitle_printeable="state.selectedDates?.length ? 'Na data/período selecionado' : 'No momento da emissão do relatório'" 
+              :value="`${!state.loading && !state.error && state.graphic_data?.tabela !== undefined ? 
+                (state.graphic_data?.tabela.filter(item => item.tipo == 'entrada').length) - (state.graphic_data?.tabela.filter(item => item.tipo == 'saida').length) 
+                : '-'}`" 
+            />
+            <Indicador 
+              class="dashboard-indicator" 
+              title="Total de entradas" 
+              :subtitle="state.selectedDates?.length ? 'Na data/período selecionado' : 'Desde o começo'" 
+              :subtitle_printeable="state.selectedDates?.length ? 'Na data/período selecionado' : 'Desde o começo até a emissão do relatório'" 
+              :value="`${!state.loading && !state.error && state.graphic_data?.tabela !== undefined ? state.graphic_data?.tabela.filter(item => item.tipo == 'entrada').length : '-'}`" 
+            />
+          </div>
         </div>
       </div>
       <hr class="dashboard-hr" />
@@ -341,7 +459,8 @@ onMounted(() => {
 .dashboard-header-print,
 .dashboard-header-printeable,
 .dashboard-title-printeable,
-.dashboard-table-content-printeable {
+.dashboard-table-content-printeable 
+{
   display: none;
 }
 
@@ -353,6 +472,7 @@ onMounted(() => {
 
 .dashboard-main {
   margin-top: -12px;
+  overflow-x: hidden;
 }
 
 .dashboard-content {
@@ -382,13 +502,11 @@ onMounted(() => {
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
-  /* border: 1px solid red; */
 }
 
 .dashboard-selector {
-  width: 320px;
+  width: 230px;
   height: 50px;
-  /* border: 1px solid green */
 }
 
 .dashboard-graphic,
@@ -434,6 +552,64 @@ onMounted(() => {
   right: 0;
 }
 
+.dashboard-indicators-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 1080px) {
+  .dashboard-selector-container {
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 824px) {
+  .dashboard-filters {
+    gap: 24px;
+  }
+
+  .dashboard-filters, .dashboard-selector-container, .dashboard-content-row {
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .dashboard-content-row {
+    margin-top: 24px;
+    gap: 8px;
+  }
+
+  .dashboard-indicators {
+    width: 100%;
+    margin: auto;
+    gap: 0;
+  }
+
+  .dashboard-indicators .dashboard-title {
+    margin: 0;
+    padding: 0;
+    
+  }
+  
+  .dashboard-indicators-container {
+    width: 100%;
+    flex-direction: row;
+    align-items: space-around;
+  }
+
+  .dashboard-graphic .dashboard-title {
+    margin-bottom: 48px;
+  }
+
+
+  .dashboard-graphic .dashboard-download-btn {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 48px;
+  }
+}
+
 @media print {
 
   .dashboard-header,
@@ -443,6 +619,10 @@ onMounted(() => {
   .dashboard-table-content,
   .dashboard-graphic {
     display: none;
+  }
+
+  .dashboard-main {
+    overflow-x: inherit;
   }
 
   .dashboard-table-content-printeable {
@@ -505,9 +685,9 @@ onMounted(() => {
     margin-bottom: 26px;
   }
 
-  .dashboard-table-row {
+  /* .dashboard-table-row {
     break-inside: avoid;
-  }
+  } */
 
   .dashboard-graphic {
     display: none;

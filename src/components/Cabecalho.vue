@@ -1,6 +1,6 @@
 <template>
   <v-app theme="">
-    <v-navigation-drawer class="sidebar" v-model="isDrawerOpen">
+    <v-navigation-drawer class="sidebar" v-model="isDrawerOpen" temporary>
       <div class="nav-icon-container">
         <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
       </div>
@@ -90,5 +90,11 @@ a{
 
 .v-list-item:hover {
   background-color: rgba(255, 255, 255, 0.1); 
+}
+
+@media print {
+  .sidebar {
+    display: none;
+  }
 }
 </style>
