@@ -76,6 +76,8 @@ watch(() => [state.value.refresh], newValue => {
   }, 5000);
 })
 
+watch(() => [state.value.graphic_data.tabela], newValue => console.log(newValue))
+
 const refreshDashboard = () => {
   Dashboard.refreshDashboard({
     redzone: state.value.selectedRedzone !== 'Todos' ? Number(state.value.selectedRedzone.split('-')[0]) : undefined,
@@ -85,6 +87,10 @@ const refreshDashboard = () => {
     if (res.status !== 200) {
       state.value.errorRefresh = true;
       state.value.errorRefreshSnack = true;
+      return;
+    }
+
+    if (!(res.data.entradas.length || res.data.saidas.length)) {
       return;
     }
 
@@ -328,7 +334,7 @@ onMounted(() => {
           </div>
           <SeletorData 
           label="Data/Período"
-            :width="220"
+            :width="230"
             :value="state.selectedDates?.length == 1 ? new Date(state.selectedDates[0]) : state.selectedDates?.map(item => new Date(item))"
             @on-change="handleDateSelector($event)"
             @on-clear="handleClearDate"
@@ -339,7 +345,7 @@ onMounted(() => {
       </div>
       <div class="dashboard-content-row">
         <div class="dashboard-graphic">
-          <v-tooltip bottom>
+          <v-tooltip bottom v-if="(!state.selectedDates || state.selectedDates.length == 0) && state.selectedArea == 'Todos'">
             <template v-slot:activator="{ props }">
               <v-btn class="dashboard-download-btn" icon="mdi-download" variant="text" color="#004488" v-bind="props"
                 :loading="state.loadingExportGraphic" @click="exportContent('graphic')"></v-btn>
@@ -379,15 +385,18 @@ onMounted(() => {
             <Indicador 
               class="dashboard-indicator" 
               title="Pessoas em redzone" 
-              subtitle="Neste momento"
-              subtitle_printeable="No momento da emissão do relatório" 
-              :value="`${state.graphic_data?.indicadores?.total_pessoas !== undefined ? state.graphic_data?.indicadores?.total_pessoas : '-'}`" 
+              :subtitle="state.selectedDates?.length ? 'Na data/período selecionado' : 'Neste momento'"
+              :subtitle_printeable="state.selectedDates?.length ? 'Na data/período selecionado' : 'No momento da emissão do relatório'" 
+              :value="`${!state.loading && !state.error && state.graphic_data?.tabela !== undefined ? 
+                (state.graphic_data?.tabela.filter(item => item.tipo == 'entrada').length) - (state.graphic_data?.tabela.filter(item => item.tipo == 'saida').length) 
+                : '-'}`" 
             />
             <Indicador 
               class="dashboard-indicator" 
               title="Total de entradas" 
-              subtitle="Desde o início" 
-              :value="`${state.graphic_data?.indicadores?.total_entradas !== undefined ? state.graphic_data?.indicadores?.total_entradas : '-'}`" 
+              :subtitle="state.selectedDates?.length ? 'Na data/período selecionado' : 'Desde o começo'" 
+              :subtitle_printeable="state.selectedDates?.length ? 'Na data/período selecionado' : 'Desde o começo até a emissão do relatório'" 
+              :value="`${!state.loading && !state.error && state.graphic_data?.tabela !== undefined ? state.graphic_data?.tabela.filter(item => item.tipo == 'entrada').length : '-'}`" 
             />
           </div>
         </div>
@@ -450,7 +459,8 @@ onMounted(() => {
 .dashboard-header-print,
 .dashboard-header-printeable,
 .dashboard-title-printeable,
-.dashboard-table-content-printeable {
+.dashboard-table-content-printeable 
+{
   display: none;
 }
 
@@ -492,13 +502,11 @@ onMounted(() => {
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
-  /* border: 1px solid red; */
 }
 
 .dashboard-selector {
-  width: 220px;
+  width: 230px;
   height: 50px;
-  /* border: 1px solid green */
 }
 
 .dashboard-graphic,
@@ -550,7 +558,7 @@ onMounted(() => {
   gap: 12px;
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1080px) {
   .dashboard-selector-container {
     flex-direction: column;
     justify-content: center;
@@ -574,7 +582,6 @@ onMounted(() => {
 
   .dashboard-indicators {
     width: 100%;
-    /* border: 1px solid red; */
     margin: auto;
     gap: 0;
   }
@@ -612,6 +619,10 @@ onMounted(() => {
   .dashboard-table-content,
   .dashboard-graphic {
     display: none;
+  }
+
+  .dashboard-main {
+    overflow-x: inherit;
   }
 
   .dashboard-table-content-printeable {
@@ -674,9 +685,9 @@ onMounted(() => {
     margin-bottom: 26px;
   }
 
-  .dashboard-table-row {
+  /* .dashboard-table-row {
     break-inside: avoid;
-  }
+  } */
 
   .dashboard-graphic {
     display: none;

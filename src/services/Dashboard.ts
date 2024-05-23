@@ -165,7 +165,6 @@ class Dashboard {
       saidas: IRegistroResponse[];
     };
   }> {
-    console.log(filters);
     const present = new Date();
     const [entradas, saidas] = (
       await Promise.allSettled([
