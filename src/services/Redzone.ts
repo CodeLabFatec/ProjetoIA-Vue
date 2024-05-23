@@ -9,7 +9,7 @@ class Redzone {
       const params = {} as any;
       if (area_id) params.areaId = area_id;
       const { data, status } = await api.get("/redzone", { params });
-      
+
       // for tests only
       // const area = {
       //   id: 1,
@@ -50,6 +50,7 @@ class Redzone {
   async create(redzone: {
     nome: string;
     descricao: string;
+    areaId: number;
   }): Promise<{ status: number }> {
     try {
       const { status } = await api.post("/redzone", redzone);
@@ -64,6 +65,7 @@ class Redzone {
     id: number;
     nome: string;
     descricao: string;
+    areaId: number;
   }): Promise<{ status: number }> {
     try {
       const { status } = await api.put(`/redzone/${redzone.id}`, redzone);
@@ -80,6 +82,15 @@ class Redzone {
       return { status };
     } catch (err) {
       console.log(err);
+      return { status: 500 };
+    }
+  }
+
+  async activateById(id: number): Promise<{ status: number }> {
+    try {
+      const { status } = await api.put(`/redzone/activate/${id}`);
+      return { status };
+    } catch (err) {
       return { status: 500 };
     }
   }

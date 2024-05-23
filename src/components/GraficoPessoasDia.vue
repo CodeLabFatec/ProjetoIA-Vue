@@ -36,7 +36,7 @@ export default {
           bar: {
             horizontal: false,
             columnWidth: '55%',
-            endingShape: 'rounded',
+            endingShape: 'rounded'
           },
         },
         dataLabels: {

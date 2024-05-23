@@ -6,39 +6,38 @@ import Titulo from "@/components/Titulo.vue";
 import Botao from "@/components/Botao.vue";
 import OpcoesBtn from "@/components/OpcoesBtn.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import RedzoneModal from "@/components/RedzoneModal.vue";
+import AreaModal from "@/components/AreaModal.vue";
 
-import Redzone from "@/services/Redzone";
+import Area from "@/services/Area";
 
-import type IRedzone from "@/interfaces/IRedzone";
+import type IArea from "@/interfaces/IArea";
 
 const router = useRouter();
 
 const state = ref({
-  items: [] as IRedzone[],
+  items: [] as IArea[],
   error: false,
   loading: false,
   search: "",
   deleteModal: false,
-  selectedRedzone: undefined as IRedzone | undefined,
+  activateModal: false,
+  selectedArea: undefined as IArea | undefined,
   deleteFailed: false,
   deleteSuccess: false,
-  redzoneModal: false,
-  activateModal: false,
+  areaModal: false,
   activateFailed: false,
   activateSuccess: false,
 });
 
-const getRedzones = () => {
+const getAreas = () => {
   state.value.items = [];
   state.value.loading = true;
-  Redzone.getRedzones()
+  Area.getAreas()
     .then((res) => {
       const { status, data } = res;
       if (status == 200) {
         state.value.items = data.map((item) => ({
           ...item,
-          data: new Date(item.data).toLocaleDateString("pt-BR"),
           status_str: item.status == true ? "Ativo" : "Inativo",
         }));
       } else {
@@ -54,7 +53,7 @@ const getRedzones = () => {
 };
 
 onMounted(() => {
-  getRedzones();
+  getAreas();
 });
 
 const headers = [
@@ -66,15 +65,11 @@ const headers = [
   },
   {
     key: "nome",
-    title: "RedZone",
-  },
-  {
-    key: "data",
-    title: "Data de cadastro",
-  },
-  {
-    key: "area.nome",
     title: "Área",
+  },
+  {
+    key: "descricao",
+    title: "Descrição",
   },
   {
     key: "status_str",
@@ -86,64 +81,40 @@ const updateDeleteModal = (new_state: boolean) => {
   state.value.deleteModal = new_state;
 };
 
-const updateRedzoneModal = (new_state: boolean) => {
-  state.value.redzoneModal = new_state;
-};
-
-const askDeleteItem = (item: IRedzone | undefined) => {
-  state.value.selectedRedzone = item;
-  updateDeleteModal(true);
-};
-
 const updateActivateModal = (new_state: boolean) => {
   state.value.activateModal = new_state;
 };
 
-function askActivateItem(item: IRedzone | undefined) {
-  state.value.selectedRedzone = item;
+const updateAreaModal = (new_state: boolean) => {
+  state.value.areaModal = new_state;
+};
+
+const askDeleteItem = (item: IArea | undefined) => {
+  state.value.selectedArea = item;
+  updateDeleteModal(true);
+};
+
+function askActivateItem(item: IArea | undefined) {
+  state.value.selectedArea = item;
   updateActivateModal(true);
 }
 
-const confirmActivateItem = () => {
-  if (state.value.selectedRedzone) {
-    state.value.redzoneModal = false;
+const confirmDeleteItem = () => {
+  if (state.value.selectedArea) {
+    state.value.areaModal = false;
     state.value.loading = true;
-    updateActivateModal(false);
-    Redzone.activateById(state.value.selectedRedzone.id as number)
+    updateDeleteModal(false);
+    Area.deleteById(state.value.selectedArea.id as number)
       .then((res) => {
         console.log(res);
         if (res.status == 204) {
-          state.value.activateSuccess = true;
-          getRedzones();
-        } else {
-          state.value.activateFailed = true;
-          state.value.loading = false;
-        }
-        state.value.selectedRedzone = undefined;
-      })
-      .catch((err) => {
-        console.log(err);
-        state.value.activateFailed = true;
-        state.value.loading = false;
-      });
-  }
-};
-
-const confirmDeleteItem = () => {
-  if (state.value.selectedRedzone) {
-    state.value.redzoneModal = false;
-    state.value.loading = true;
-    updateDeleteModal(false);
-    Redzone.delete(state.value.selectedRedzone.id)
-      .then((res) => {
-        if (res.status == 204) {
           state.value.deleteSuccess = true;
-          getRedzones();
+          getAreas();
         } else {
           state.value.deleteFailed = true;
           state.value.loading = false;
         }
-        state.value.selectedRedzone = undefined;
+        state.value.selectedArea = undefined;
       })
       .catch((err) => {
         console.log(err);
@@ -153,19 +124,44 @@ const confirmDeleteItem = () => {
   }
 };
 
+const confirmActivateItem = () => {
+  if (state.value.selectedArea) {
+    state.value.areaModal = false;
+    state.value.loading = true;
+    updateActivateModal(false);
+    Area.activateById(state.value.selectedArea.id as number)
+      .then((res) => {
+        console.log(res);
+        if (res.status == 204) {
+          state.value.activateSuccess = true;
+          getAreas();
+        } else {
+          state.value.activateFailed = true;
+          state.value.loading = false;
+        }
+        state.value.selectedArea = undefined;
+      })
+      .catch((err) => {
+        console.log(err);
+        state.value.activateFailed = true;
+        state.value.loading = false;
+      });
+  }
+};
+
 const goToUpdate = (id: number | undefined) => {
-  router.push(`/redzones/update/${id || ""}`);
+  router.push(`/area/update/${id || ""}`);
 };
 
 const goToCreate = () => {
-  router.push("/redzones/create");
+  router.push("/area/create");
 };
 
-const onSelect = (option: string, item: IRedzone) => {
+const onSelect = (option: string, item: IArea) => {
   switch (option) {
     case "Detalhes":
-      state.value.redzoneModal = true;
-      state.value.selectedRedzone = item;
+      state.value.areaModal = true;
+      state.value.selectedArea = item;
       break;
     case "Editar":
       goToUpdate(item.id);
@@ -181,16 +177,16 @@ const onSelect = (option: string, item: IRedzone) => {
 </script>
 
 <template>
-  <main class="redzones-list-main">
-    <Titulo content="RedZones" />
-    <p v-if="state.error" class="redzoneslist-error">
+  <main class="areas-list-main">
+    <Titulo content="Áreas" />
+    <p v-if="state.error" class="areaslist-error">
       Um erro interno aconteceu. Tente novamente mais tarde.
     </p>
-    <div class="redzoneslist-btncontainer">
+    <div class="areaslist-btncontainer">
       <v-text-field
         placeholder="Pesquisar..."
         variant="underlined"
-        class="redzoneslist-btncontainer-searchinput"
+        class="areaslist-btncontainer-searchinput"
         v-model="state.search"
         prepend-inner-icon="mdi-magnify"
       ></v-text-field>
@@ -198,11 +194,11 @@ const onSelect = (option: string, item: IRedzone) => {
         <Botao
           content="Adicionar"
           @click="goToCreate()"
-          class="redzoneslist-btn"
+          class="areaslist-btn"
         />
       </div>
     </div>
-    <div class="redzoneslist-tablecontainer">
+    <div class="areaslist-tablecontainer">
       <v-data-table
         :headers="headers"
         :items="state.items"
@@ -252,7 +248,7 @@ const onSelect = (option: string, item: IRedzone) => {
     msg_cancel="cancelar"
     msg_confirm="confirmar"
     :visible="state.deleteModal"
-    :message="`Inativar redzone ${state.selectedRedzone?.nome}?`"
+    :message="`Inativar área ${state.selectedArea?.nome}?`"
     @on-update-modal="updateDeleteModal($event)"
     @on-confirm="confirmDeleteItem()"
   />
@@ -262,35 +258,36 @@ const onSelect = (option: string, item: IRedzone) => {
     msg_cancel="cancelar"
     msg_confirm="confirmar"
     :visible="state.activateModal"
-    :message="`Ativar redzone ${state.selectedRedzone?.nome}?`"
+    :message="`Ativar área ${state.selectedArea?.nome}?`"
     @on-update-modal="updateActivateModal($event)"
     @on-confirm="confirmActivateItem()"
   />
 
-  <RedzoneModal
-    :redzone="state.selectedRedzone"
-    :visible="state.redzoneModal"
-    @on-update-modal="updateRedzoneModal($event)"
-    @on-delete-request="askDeleteItem(state.selectedRedzone)"
-    @on-update-request="goToUpdate(state.selectedRedzone?.id)"
+  <AreaModal
+    :visible="state.areaModal"
+    :area="state.selectedArea"
+    @on-update-modal="updateAreaModal($event)"
+    @on-delete-request="askDeleteItem(state.selectedArea)"
+    @on-update-request="goToUpdate(state.selectedArea?.id)"
+    @on-activate-request="askActivateItem(state.selectedArea)"
   />
 
   <v-snackbar color="red" v-model="state.deleteFailed">
-    Não foi possível inativar redzone. Tente novamente mais tarde.
+    Não foi possível inativar a área. Tente novamente mais tarde.
   </v-snackbar>
   <v-snackbar color="green" v-model="state.deleteSuccess">
-    Redzone inativada com sucesso.
+    Área inativada com sucesso.
   </v-snackbar>
   <v-snackbar color="red" v-model="state.activateFailed">
-    Não foi possível ativar redzone. Tente novamente mais tarde.
+    Não foi possível ativar a área. Tente novamente mais tarde.
   </v-snackbar>
   <v-snackbar color="green" v-model="state.activateSuccess">
-    Redzone ativada com sucesso.
+    Área ativada com sucesso.
   </v-snackbar>
 </template>
 
 <style scoped>
-.redzoneslist-btncontainer {
+.areaslist-btncontainer {
   display: flex;
   width: 90%;
   margin: 12px auto;
@@ -299,22 +296,22 @@ const onSelect = (option: string, item: IRedzone) => {
   margin-bottom: -18px;
 }
 
-.redzoneslist-btncontainer-searchinput {
+.areaslist-btncontainer-searchinput {
   flex: 1;
   padding: 0;
 }
 
-.redzoneslist-btn {
+.areaslist-btn {
   width: 200px;
   margin-top: 12px;
 }
 
-.redzoneslist-tablecontainer {
+.areaslist-tablecontainer {
   margin: 12px auto;
   width: 90%;
 }
 
-.redzoneslist-error {
+.areaslist-error {
   color: red;
   text-align: center;
 }

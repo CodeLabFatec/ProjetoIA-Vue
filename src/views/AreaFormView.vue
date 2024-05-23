@@ -5,11 +5,8 @@ import { useRouter, useRoute } from "vue-router";
 import Titulo from "@/components/Titulo.vue";
 import Botao from "@/components/Botao.vue";
 
-import Redzone from "@/services/Redzone";
-import LoadingBar from "@/components/LoadingBar.vue";
-import type IArea from "@/interfaces/IArea";
 import Area from "@/services/Area";
-import { watch } from "vue";
+import LoadingBar from "@/components/LoadingBar.vue";
 
 const router = useRouter();
 const route_data = useRoute();
@@ -21,26 +18,16 @@ const state = ref({
   error: false,
   success: false,
   invalid: false,
-  areas: [] as IArea[],
-  selectedArea: "Selecione...",
-  areasSelector: [] as string[],
 });
 
 onMounted(() => {
-  Area.getAreas().then((r) => {
-    if (r.status !== 200 || r.data.length === 0) return;
-    state.value.areas = r.data;
-  });
-
   if (route_data.params.id) {
     state.value.loading = true;
-    Redzone.getRedzonesByID(Number(route_data.params.id))
+    Area.getByID(Number(route_data.params.id))
       .then((res) => {
         if (res.status == 200 && res.data) {
           state.value.nome = res.data.nome;
           state.value.descricao = res.data.descricao;
-          const area = res.data.area;
-          state.value.selectedArea = `${area.id} - ${area.nome}`;
         } else {
           state.value.error = true;
         }
@@ -54,19 +41,6 @@ onMounted(() => {
   }
 });
 
-const updateSelector = (list: "areasSelector", items: IArea[]) => {
-  state.value[list] = [...items.map((item) => `${item.id} - ${item.nome}`)];
-};
-
-watch(
-  () => [state.value.areas],
-  (newValue) => {
-    const [newAreas] = newValue;
-
-    updateSelector("areasSelector", newAreas);
-  }
-);
-
 const onSubmit = () => {
   if (!state.value.nome) {
     state.value.invalid = true;
@@ -74,13 +48,10 @@ const onSubmit = () => {
   }
 
   state.value.loading = true;
-  const areaId = state.value.selectedArea.split(" -")[0];
-
-  Redzone[route_data.params.id ? "update" : "create"]({
+  Area[route_data.params.id ? "update" : "create"]({
     id: Number(route_data.params.id),
     nome: state.value.nome,
     descricao: state.value.descricao,
-    areaId: Number(areaId),
   })
     .then((res) => {
       if (res.status !== 201 && res.status !== 200) {
@@ -102,8 +73,6 @@ const onSubmit = () => {
     });
 };
 
-const handleAreaSelector = () => {};
-
 const reset = () => {
   state.value = {
     invalid: false,
@@ -112,9 +81,6 @@ const reset = () => {
     loading: false,
     nome: "",
     success: false,
-    areas: [],
-    selectedArea: "",
-    areasSelector: [],
   };
 };
 
@@ -128,10 +94,10 @@ const clearError = () => {
 </script>
 
 <template>
-  <main class="redzonesform">
+  <main class="areaform">
     <LoadingBar :visible="state.loading" />
-    <div class="redzonesform-titulo-container">
-      <div class="redzonesform-backbtn">
+    <div class="areaform-titulo-container">
+      <div class="areaform-backbtn">
         <v-btn
           @click="goBack"
           variant="text"
@@ -140,9 +106,7 @@ const clearError = () => {
         ></v-btn>
       </div>
       <Titulo
-        :content="
-          route_data.params.id ? 'Edição de Redzone' : 'Cadastro de RedZone'
-        "
+        :content="route_data.params.id ? 'Edição de Área' : 'Cadastro de Área'"
       />
     </div>
     <form @submit.prevent="onSubmit" class="form">
@@ -166,17 +130,7 @@ const clearError = () => {
           auto-grow
         ></v-textarea>
       </div>
-      <div>
-        <v-select
-          color="#004488"
-          label="Área"
-          variant="underlined"
-          :items="state.areasSelector"
-          v-model="state.selectedArea"
-          @update:model-value="handleAreaSelector"
-        ></v-select>
-      </div>
-      <div class="redzonesform-containerbtn">
+      <div class="areaform-containerbtn">
         <Botao
           :disabled="state.loading"
           :content="route_data.params.id ? 'Editar' : 'Cadastrar'"
@@ -185,7 +139,7 @@ const clearError = () => {
     </form>
   </main>
   <v-snackbar color="green" v-model="state.success">
-    Redzone {{ route_data.params.id ? "editada" : "criada" }} com sucesso!
+    Área {{ route_data.params.id ? "editada" : "criada" }} com sucesso!
     Retornando à tela de listagem...
   </v-snackbar>
   <v-snackbar color="red" v-model="state.error">
@@ -194,13 +148,13 @@ const clearError = () => {
 </template>
 
 <style scoped>
-.redzonesform-backbtn {
+.areaform-backbtn {
   position: absolute;
   top: 74px;
   left: 0;
 }
 
-.redzonesform {
+.areaform {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -208,12 +162,12 @@ const clearError = () => {
   margin-bottom: 24px;
 }
 
-.redzonesform-titulo-container {
+.areaform-titulo-container {
   display: flex;
   width: 100%;
 }
 
-.redzonesform .form {
+.areaform .form {
   display: flex;
   flex-direction: column;
   margin-inline: 12px;
@@ -222,7 +176,7 @@ const clearError = () => {
   gap: 12px;
 }
 
-.redzonesform-containerbtn {
+.areaform-containerbtn {
   display: flex;
   flex-direction: row-reverse;
 }

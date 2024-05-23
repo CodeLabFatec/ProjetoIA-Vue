@@ -2,7 +2,7 @@
 import Botao from "./Botao.vue";
 
 import type { PropType } from "vue";
-import type IRedzone from "@/interfaces/IRedzone";
+import type IArea from "@/interfaces/IArea";
 
 export default {
   props: {
@@ -10,8 +10,8 @@ export default {
       required: true,
       type: Boolean,
     },
-    redzone: {
-      type: Object as PropType<IRedzone | undefined>,
+    area: {
+      type: Object as PropType<IArea | undefined>,
       default: undefined,
     },
   },
@@ -44,10 +44,10 @@ export default {
     @update:model-value="$emit('OnUpdateModal', $event)"
   >
     <v-card max-width="600px">
-      <div class="redzonemodal-title">
+      <div class="areamodal-title">
         <v-card-title class="d-flex justify-space-between align-center">
           <div>
-            {{ $props.redzone?.nome || "" }}
+            {{ $props.area?.nome || "" }}
           </div>
           <v-btn
             icon="mdi-close"
@@ -56,22 +56,19 @@ export default {
           >
           </v-btn>
         </v-card-title>
-        <v-card-text>
-          {{ `Criado em ${$props.redzone?.data}` }}
-        </v-card-text>
       </div>
-      <div class="redzonemodal-desc">
-        {{ $props.redzone?.descricao }}
+      <div class="areamodal-desc">
+        {{ $props.area?.descricao }}
       </div>
-      <div class="redzonemodal-btn-container">
+      <div class="areamodal-btn-container">
         <Botao
-          v-if="$props.redzone?.status"
+          v-if="$props.area?.status"
           content="Inativar"
           color="alert"
           @click="$emit('onDeleteRequest')"
         />
         <Botao
-          v-if="!$props.redzone?.status"
+          v-if="!$props.area?.status"
           content="Ativar"
           color="alert"
           @click="$emit('onActivateRequest')"
@@ -83,18 +80,18 @@ export default {
 </template>
 
 <style scoped>
-.redzonemodal-title {
+.areamodal-title {
   padding-inline: 4px;
 }
 
-.redzonemodal-btn-container {
+.areamodal-btn-container {
   display: flex;
   flex-direction: row-reverse;
   gap: 16px;
   padding: 22px;
 }
 
-.redzonemodal-desc {
+.areamodal-desc {
   padding-inline: 22px;
   text-align: justify;
 }
