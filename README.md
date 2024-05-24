@@ -23,6 +23,43 @@ Esse repositório contém o frontend desenvolvido para o Projeto IA (Projeto int
 
 As branches e commits desse projeto seguem o seguinte padrão estabelecido pelo [Conventional Commits](https://www.conventionalcommits.org/pt-br/v1.0.0/) e com exemplos de utilização detalhados [neste repositório](https://github.com/iuricode/padroes-de-commits).
 
+<br />
+
+> Instalação
+
+Para instalar e executar o projeto siga as instruções abaixo:
+
+1. Clone o repositório:
+    ```bash
+    git clone https://www.github.com/CodeLabFatec/ProjetoIA-Vue.git
+    ```
+
+2. Entre no diretório do projeto:
+    ```bash
+    cd ProjetoIA-Vue
+    ```
+
+3. Instale as dependências:
+    ```bash
+    npm install
+    ```
+
+4. Crie uma cópia do arquivo `.env.example` chamado `.env`:
+    ```bash
+    cp .env.example .env
+    ```
+
+5. Abra o arquivo `.env` e insira as URLs do servidor. Por exemplo:
+    ```plaintext
+    VITE_API_SPRING_BASEURL=http://localhost:8080
+    VITE_API_PYTHON_BASEURL=http://localhost:5007
+    ```
+
+6. Inicie o servidor de desenvolvimento:
+    ```bash
+    npm run dev
+    ```
+
 <br>
 
 <span id="tecnologias">
