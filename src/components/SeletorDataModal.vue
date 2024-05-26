@@ -1,11 +1,13 @@
 <script lang="ts">
+import type { PropType } from 'vue';
 import Botao from './Botao.vue';
 export default {
   props: {
     visible: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
+    value: Object as PropType<Date | Date[] | null>,
   },
   methods: {
     updateModal() {
@@ -15,10 +17,10 @@ export default {
       this.selectMode = mode;
       this.selectedDate = null;
     },
-    presentDate(date: Date | string[] | null) {
+    presentDate(date: Date | Date[] | null) {
       if (date !== null) {
-        const convertString = (text: string) => {
-          return new Date(text).toLocaleDateString('pt-BR')
+        const convertString = (date: Date) => {
+          return date.toLocaleDateString('pt-BR')
         }
 
         if (Array.isArray(date)) {
@@ -33,10 +35,10 @@ export default {
         return 'Selecione uma data'
       }
     },
-    formatDateArray(list: string[]) {
+    formatDateArray(list: Date[]) {
       return [
-        new Date(list[0]),
-        new Date(list[list.length - 1]),
+        list[0],
+        list[list.length - 1],
       ]
     },
     confirmSelectedDate() {
@@ -49,11 +51,24 @@ export default {
     visible(newVal) {
       this.dialog = newVal;
     },
+    value(newValue) {
+      if (Array.isArray(newValue) && newValue.length) {
+        let [date_start, date_end] = newValue;
+        let date_list = [];
+        while (date_start <= date_end) {
+          date_list.push(new Date(date_start));
+          date_start.setDate(new Date(date_start).getDate() + 1)
+        }
+        this.selectedDate = date_list;
+      } else {
+        this.selectedDate = newValue;
+      }
+    },
   },
   data(): { 
     dialog: boolean; 
     selectMode: string; 
-    selectedDate: Date | string[] | null 
+    selectedDate: Date | Date[] | null 
   } {
     return {
       dialog: this.visible,
@@ -90,13 +105,19 @@ export default {
       </div>
       <v-date-picker :border="false" v-model="selectedDate" :hide-header="true"
         :multiple="selectMode == 'range' ? selectMode : false"></v-date-picker>
-      <Botao
-        :disabled="
-        (selectMode == 'range' && selectedDate !== null && Array.isArray(selectedDate) && selectedDate.length < 2) ||
-        (selectedDate == null)"
-        :content="selectMode == 'range' ? 'Selecionar período' : 'Selecionar data'" 
-        @click="confirmSelectedDate()"
-      />
+      <div class="final-btn-container">
+        <Botao
+          :disabled="
+          !((selectedDate instanceof Date)  || (Array.isArray(selectedDate) && (selectedDate as Date[]).length !== 0) && (selectMode == 'range' ? (selectedDate as Date[]).length > 1 : true))"
+          :content="selectMode == 'range' ? 'Selecionar período' : 'Selecionar data'" 
+          @click="confirmSelectedDate()"
+        />
+        <Botao
+          content="Cancelar" 
+          color="secondary"
+          @click="updateModal()"
+        />
+      </div>
     </div>
   </v-dialog>
 </template>
@@ -147,5 +168,11 @@ export default {
   border-bottom: 1px solid var(--blue);
   padding-block: 8px;
   padding-inline: 12px;
+}
+
+.final-btn-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 </style>

@@ -1,12 +1,16 @@
 <template>
   <v-app theme="">
-    <v-navigation-drawer class="sidebar" v-model="isDrawerOpen">
+    <v-navigation-drawer class="sidebar" v-model="isDrawerOpen" temporary>
       <div class="nav-icon-container">
-        <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon
+          @click="isDrawerOpen = !isDrawerOpen"
+        ></v-app-bar-nav-icon>
       </div>
       <v-list v-model:opened="open" active-class="active-item">
-        <v-list-item @click="goTo('')" prepend-icon="mdi-home">Home</v-list-item>
-        <v-list-group value="Redzones">
+        <v-list-item @click="goTo('')" prepend-icon="mdi-home"
+          >Home</v-list-item
+        >
+        <v-list-group value="Redzones e Áreas">
           <template v-slot:activator="{ props }">
             <v-list-item
               v-bind="props"
@@ -14,16 +18,24 @@
               title="Redzones"
             ></v-list-item>
           </template>
-            <v-list-item @click="goTo('redzones')">Lista de Redzones</v-list-item>
-            <v-list-item @click="goTo('redzones/create')">Cadastro de redzones</v-list-item>
-            <!-- <v-list-item>Cadastro de áreas</v-list-item> -->
+          <v-list-item @click="goTo('redzones')">Lista de Redzones</v-list-item>
+          <v-list-item @click="goTo('redzones/create')"
+            >Cadastro de redzones</v-list-item
+          >
+          <v-list-item @click="goTo('area')">Lista de Áreas</v-list-item>
+          <v-list-item @click="goTo('area/create')"
+            >Cadastro de áreas</v-list-item
+          >
+          <!-- <v-list-item>Cadastro de áreas</v-list-item> -->
         </v-list-group>
         <!-- <v-list-item prepend-icon="mdi-account">Cadastros</v-list-item> -->
       </v-list>
     </v-navigation-drawer>
 
     <header class="container">
-      <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon
+        @click="isDrawerOpen = !isDrawerOpen"
+      ></v-app-bar-nav-icon>
       <img src="../assets/logo.png" alt="Altave" />
     </header>
     <slot></slot>
@@ -31,12 +43,12 @@
 </template>
 
 <script lang="ts">
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 export default {
   data() {
     return {
-      open: ['Redzones'],
+      open: ["Redzones"],
       isDrawerOpen: false,
       router: useRouter(),
     };
@@ -45,8 +57,8 @@ export default {
     goTo(path: string) {
       this.router.push(`/${path}`);
       this.isDrawerOpen = false;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -69,26 +81,31 @@ export default {
 .nav-icon-container {
   display: flex;
   align-items: center;
-  justify-content: flex-end; 
-  padding-right: 16px; 
+  justify-content: flex-end;
+  padding-right: 16px;
 }
 .sidebar {
   background-color: var(--gray);
   color: white;
   display: flex;
-  
 }
 
-a{
+a {
   text-decoration: none;
 }
 .v-list-item {
-  color: white; 
+  color: white;
   transition: all 0.3s ease;
-  cursor: pointer; 
+  cursor: pointer;
 }
 
 .v-list-item:hover {
-  background-color: rgba(255, 255, 255, 0.1); 
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+@media print {
+  .sidebar {
+    display: none;
+  }
 }
 </style>

@@ -20,39 +20,91 @@ class Dashboard {
       return item_date === date;
     });
 
-    console.log({filtered_list, list, date})
-
-    return filtered_list
+    return filtered_list;
   };
 
-  private convertRegistersInGraphicData = (list: IRegistroResponse[]) => {
-    let last_7days_list: string[] = [];
+  private convertRegistersInGraphicData = (
+    list: IRegistroResponse[],
+    pre_period?: string[]
+  ) => {
+    let day_array: string[] = [];
 
-    for (let i = 0; i < 7; i++) {
-      let data = new Date();
-      data.setDate(data.getDate() - i);
-      let dataString = data.toISOString().split("T")[0];
-      last_7days_list.push(dataString);
+    const period = pre_period
+      ? pre_period.map((date) => new Date(date))
+      : undefined;
+
+    const pre_date = new Date();
+    const pre_date_str = `${pre_date.getFullYear()}-${
+      pre_date.getMonth() + 1
+    }-${pre_date.getDate()}`;
+    if (!period || !period.length) {
+      for (let i = 0; i < 7; i++) {
+        let data = new Date(pre_date_str);
+        data.setDate(data.getDate() - i);
+        let dataString = data.toISOString().split("T")[0];
+        day_array.push(dataString);
+      }
+    } else if (period.length > 1) {
+      const ms_diference = Math.abs(period[0].getTime() - period[1].getTime());
+      const day_distance = Math.ceil(ms_diference / (1000 * 60 * 60 * 24)) + 1;
+      for (let i = 0; i < day_distance; i++) {
+        let date = new Date(period[0]);
+        date.setDate(date.getDate() + i);
+        let date_string = date.toISOString().split("T")[0];
+        day_array.push(date_string);
+      }
+    } else {
+      day_array.push(period[0].toISOString().split("T")[0]);
     }
 
-    const register_groupedby_date = last_7days_list.map((date) => ({
+    const register_groupedby_date = day_array.map((date) => ({
       data: date,
-      valor: this.filterRegisterByDate(list, date).length,
+      valor: this.filterRegisterByDate(list, date),
     }));
 
     return register_groupedby_date;
   };
 
   async getDashboard(
-    id_redzone?: number
+    id_redzone?: number,
+    id_area?: number,
+    date?: Date | Date[]
   ): Promise<{ status: number; data?: IDashboardResponse }> {
+    const date_string = date
+      ? Array.isArray(date)
+        ? date.map(
+            (item) =>
+              `${item.getFullYear()}-${item.getMonth() + 1}-${item.getDate()}`
+          )
+        : [`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`]
+      : undefined;
     try {
       const [total_entradas, total_saidas, entradas, saidas] = (
         await Promise.allSettled([
-          RegistroEntradasSaidas.getRegistroLength("entrada", id_redzone),
-          RegistroEntradasSaidas.getRegistroLength("saida", id_redzone),
-          RegistroEntradasSaidas.getRegistros("entrada", id_redzone),
-          RegistroEntradasSaidas.getRegistros("saida", id_redzone),
+          RegistroEntradasSaidas.getRegistroLength(
+            "entrada",
+            id_redzone,
+            id_area,
+            date
+          ),
+          RegistroEntradasSaidas.getRegistroLength(
+            "saida",
+            id_redzone,
+            id_area,
+            date
+          ),
+          RegistroEntradasSaidas.getRegistros(
+            "entrada",
+            id_redzone,
+            id_area,
+            date
+          ),
+          RegistroEntradasSaidas.getRegistros(
+            "saida",
+            id_redzone,
+            id_area,
+            date
+          ),
         ])
       ).map((result) =>
         result.status === "fulfilled" ? result.value : { status: 500 }
@@ -82,7 +134,8 @@ class Dashboard {
 
         const info_dashboard: IDashboardResponse = {
           grafico: this.convertRegistersInGraphicData(
-            entradas.data as IRegistroResponse[]
+            entradas.data as IRegistroResponse[],
+            date_string
           ),
           tabela: merged_entradas_saidas,
           indicadores: {
@@ -100,6 +153,90 @@ class Dashboard {
       console.log(e);
       return { status: 500 };
     }
+  }
+
+  async refreshDashboard(filters: {
+    redzone?: number;
+    area?: number;
+  }): Promise<{
+    status: number;
+    data: {
+      entradas: IRegistroResponse[];
+      saidas: IRegistroResponse[];
+    };
+  }> {
+    const present = new Date();
+    const [entradas, saidas] = (
+      await Promise.allSettled([
+        RegistroEntradasSaidas.getRegistros(
+          "entrada",
+          filters.redzone,
+          filters.area,
+          [present],
+          true
+        ),
+        RegistroEntradasSaidas.getRegistros(
+          "saida",
+          filters.redzone,
+          filters.area,
+          [present],
+          true
+        ),
+      ])
+    ).map((result) =>
+      result.status === "fulfilled" ? result.value : { status: 500, data: [] }
+    );
+
+    const response = {
+      status: (entradas.status == 200 && saidas.status == entradas.status) ? 200 : 500,
+      data: {
+        entradas: entradas.data || [],
+        saidas: saidas.data || [],
+      }
+    };
+
+    // for tests only
+    // const response = {
+    //   status: 500,
+    //   data: {
+    //     entradas: [
+    //       {
+    //         id: 200,
+    //         data: "2024-05-21T23:00:00Z",
+    //         redZone: {
+    //           id: 3,
+    //           nome: "RedZone 3",
+    //           descricao: "Descrição da RedZone 3",
+    //           data: "2024-05-12T08:45:00",
+    //           area: {
+    //             id: 3,
+    //             nome: "Área C",
+    //             descricao: "Descrição da Área C",
+    //           },
+    //         },
+    //       },
+    //     ] as IRegistroResponse[],
+    //     saidas: [
+    //       {
+    //         id: 200,
+    //         data: "2024-05-21T23:00:00Z",
+    //         redZone: {
+    //           id: 3,
+    //           nome: "RedZone 3",
+    //           descricao: "Descrição da RedZone 3",
+    //           data: "2024-05-12T08:45:00",
+    //           area: {
+    //             id: 3,
+    //             nome: "Área C",
+    //             descricao: "Descrição da Área C",
+    //           },
+    //         },
+    //       },
+    //     ]
+    //   },
+    // };
+
+    return response;
   }
 }
 

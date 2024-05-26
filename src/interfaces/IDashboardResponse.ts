@@ -1,4 +1,4 @@
-import type IDiaPessoas from "./IDiaPessoas";
+import type {IDiaPessoas} from "./IDiaPessoas";
 import type IRegistroEntradaSaida from "./IRegistroEntradaSaida";
 
 export default interface IDashboardResponse {

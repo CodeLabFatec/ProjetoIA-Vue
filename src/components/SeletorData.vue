@@ -16,6 +16,10 @@ export default {
   props: {
     label: String,
     value: Object as PropType<Date | Date[] | null>,
+    width: {
+      type: Number,
+      default: 380
+    },
   },
   components: {
     SeletorDataModal
@@ -41,6 +45,9 @@ export default {
     updateSelectedDate(date: Date | Date[] | null) {
       this.selectedDate = date;
       this.$emit('onChange', date);
+    },
+    handleClear() {
+      this.$emit('onClear');
     }
   },
   watch: {
@@ -49,20 +56,23 @@ export default {
     }
   },
   emits: [
-    'onChange'
+    'onChange',
+    'onClear'
   ]
 }
 </script>
 
 <template>
-  <button class="container" @click="updateModal()">
+  <button class="container" :style="{width: `${width}px`}"@click="updateModal()">
     <span class="label">{{ label }}</span>
     <span class="content">{{ presentDate(selectedDate) }}</span>
+    <v-btn v-if="(selectedDate instanceof Date)  || (Array.isArray(selectedDate) && (selectedDate as Date[]).length !== 0)" icon="mdi-close" variant="text" class="clear-btn" size="small" color="#7a7a7a" @click.stop="handleClear"></v-btn>
   </button>
   <SeletorDataModal 
     @on-confirm-selected-date="updateSelectedDate($event)"
     @update-modal="updateModal()" 
     :visible="modal" 
+    :value="selectedDate"
   />
 </template>
 
@@ -70,15 +80,25 @@ export default {
 .container {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid var(--dark-blue);
-  padding-right: 16px;
+  border-bottom: 1px solid #ababab;
+  margin-block: 8px;
+  position: relative;
 }
 
 .label {
-  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 1px;
+  opacity: 70%;
 }
 
 .content {
-  padding: 12px;
+  margin-block: 2px;
+  padding-left: 2px;
+}
+
+.clear-btn {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
 }
 </style>
