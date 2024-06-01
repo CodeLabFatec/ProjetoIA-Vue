@@ -5,6 +5,8 @@ import RedzonesFormView from '@/views/RedzonesFormView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import AreaListView from '@/views/AreaListView.vue'
 import AreaFormView from '@/views/AreaFormView.vue'
+import UserFormView from '@/views/UserFormView.vue'
+import UserListView from '@/views/UserListView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +45,21 @@ const router = createRouter({
       path: '/area/update/:id',
       name: 'update area',
       component: AreaFormView
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: UserListView,
+    },
+    {
+      path: '/users/create',
+      name: 'create users',
+      component: UserFormView
+    },
+    {
+      path: '/users/update/:id',
+      name: 'update users',
+      component: UserFormView
     },
   ]
 })
