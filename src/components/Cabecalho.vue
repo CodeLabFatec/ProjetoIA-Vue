@@ -28,7 +28,19 @@
           >
           <!-- <v-list-item>Cadastro de áreas</v-list-item> -->
         </v-list-group>
-        <!-- <v-list-item prepend-icon="mdi-account">Cadastros</v-list-item> -->
+        <v-list-group value="Usuários">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-account-circle"
+              title="Usuários"
+            ></v-list-item>
+          </template>
+          <v-list-item @click="goTo('users')">Lista de Usuários</v-list-item>
+          <v-list-item @click="goTo('users/create')"
+            >Cadastro de usuários</v-list-item
+          >
+        </v-list-group>
       </v-list>
     </v-navigation-drawer>
 
