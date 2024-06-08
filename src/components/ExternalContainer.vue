@@ -28,6 +28,7 @@
     align-items: center;
     justify-content: center;
     background-image: url('@/assets/external-banner.png');
+    background-size: cover;
     width: 50%;
   }
   

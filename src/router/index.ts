@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
 import RedzonesListView from '@/views/RedzonesListView.vue'
 import RedzonesFormView from '@/views/RedzonesFormView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import AreaListView from '@/views/AreaListView.vue'
 import AreaFormView from '@/views/AreaFormView.vue'
+import LoginView from '@/views/LoginView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +43,11 @@ const router = createRouter({
       path: '/area/update/:id',
       name: 'update area',
       component: AreaFormView
+    },
+    {
+      path: '/auth',
+      name: 'login',
+      component: LoginView
     },
   ]
 })
