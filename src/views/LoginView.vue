@@ -40,6 +40,10 @@ const submit = () => {
     })
 }
 
+const goToChangePassword = () => {
+  router.push('/change-password');
+}
+
 const onFocus = () => {
   state.value.error = false;
   state.value.serverError = false;
@@ -58,7 +62,7 @@ const onFocus = () => {
           <v-text-field :disabled="state.loading" :error="state.error" @update:focused="onFocus" class="input" label="Senha" variant="outlined"
             v-model="state.senha" type="password" required></v-text-field>
           <div class="btns">
-            <button type="button" :disabled="state.loading">Esqueci minha senha</button>
+            <button type="button" :disabled="state.loading" @click="goToChangePassword">Esqueci minha senha</button>
             <v-btn type="submit" color="#003365" :loading="state.loading">Entrar</v-btn>
             <span class="error-warning" v-if="state.error">Email/senha incorretos.</span>
             <span class="error-warning" v-if="state.serverError">Erro interno do servidor, <br> tente novamente mais
