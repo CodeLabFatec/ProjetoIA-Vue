@@ -20,7 +20,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <header v-if="path !== '/auth'" class="container">
+    <header v-if="path !== '/auth' && path !== '/change-password'" class="container">
       <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
       <img src="../assets/logo.png" alt="Altave" />
     </header>
