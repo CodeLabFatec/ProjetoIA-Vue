@@ -25,6 +25,24 @@ class Autenticacao {
 
     return { status };
   }
+
+  async updatePassword(
+    userId: number,
+    oldPassword: string,
+    newPassword: string
+  ): Promise<{ status: number }> {
+    try {
+      const { status } = await api.patch("/user/password", {
+        oldPassword,
+        newPassword,
+        userId,
+      });
+
+      return { status };
+    } catch (e) {
+      return { status: 400 };
+    }
+  }
 }
 
 export default new Autenticacao();
