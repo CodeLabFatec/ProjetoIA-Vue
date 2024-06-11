@@ -5,5 +5,6 @@ export default interface IUser {
     matricula: string;
     descricao: string;
     tipoAcesso: string;
+    status: boolean;
   }
   

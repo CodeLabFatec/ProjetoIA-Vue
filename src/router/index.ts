@@ -47,17 +47,17 @@ const router = createRouter({
       component: AreaFormView
     },
     {
-      path: '/user',
+      path: '/users',
       name: 'user',
       component: UserListView,
     },
     {
-      path: '/user/create',
+      path: '/users/create',
       name: 'create users',
       component: UserFormView
     },
     {
-      path: '/user/update/:id',
+      path: '/users/update/:id',
       name: 'update user',
       component: UserFormView
     },

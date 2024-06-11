@@ -8,20 +8,20 @@ import OpcoesBtn from "@/components/OpcoesBtn.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import AreaModal from "@/components/AreaModal.vue";
 
-import Area from "@/services/Area";
+import User from "@/services/User";
 
-import type IArea from "@/interfaces/IArea";
+import type IUser from "@/interfaces/IUser";
 
 const router = useRouter();
 
 const state = ref({
-  items: [] as IArea[],
+  items: [] as IUser[],
   error: false,
   loading: false,
   search: "",
   deleteModal: false,
   activateModal: false,
-  selectedArea: undefined as IArea | undefined,
+  selectedArea: undefined as IUser | undefined,
   deleteFailed: false,
   deleteSuccess: false,
   areaModal: false,
@@ -29,52 +29,37 @@ const state = ref({
   activateSuccess: false,
 });
 
-const getAreas = () => {
+const getUsers = async () => {
   state.value.items = [];
   state.value.loading = true;
-  Area.getAreas()
-    .then((res) => {
-      const { status, data } = res;
-      if (status == 200) {
-        state.value.items = data.map((item) => ({
-          ...item,
-          status_str: item.status == true ? "Ativo" : "Inativo",
-        }));
-      } else {
-        state.value.error = true;
-      }
-      state.value.loading = false;
-    })
-    .catch((err) => {
-      console.log(err);
-      state.value.loading = false;
+  try {
+    const res = await User.getUsers();
+    const { status, data } = res;
+    if (status === 200 && Array.isArray(data)) {
+      state.value.items = data.map((item) => ({
+        ...item,
+        status_str: item.status ? "Ativo" : "Inativo",
+      }));
+    } else {
       state.value.error = true;
-    });
+    }
+  } catch (err) {
+    console.log(err);
+    state.value.error = true;
+  } finally {
+    state.value.loading = false;
+  }
 };
 
 onMounted(() => {
-  getAreas();
+  getUsers();
 });
 
 const headers = [
-  {
-    key: "id",
-    title: "",
-    sortable: false,
-    width: 0,
-  },
-  {
-    key: "nome",
-    title: "Usuário",
-  },
-  {
-    key: "email",
-    title: "E-mail",
-  },
-  {
-    key: "status_str",
-    title: "Tipo de Acesso",
-  },
+  { key: "id", title: "", sortable: false, width: 0 },
+  { key: "nome", title: "Usuário" },
+  { key: "email", title: "E-mail" },
+  { key: "status_str", title: "Tipo de Acesso" },
 ];
 
 const updateDeleteModal = (new_state: boolean) => {
@@ -89,63 +74,35 @@ const updateAreaModal = (new_state: boolean) => {
   state.value.areaModal = new_state;
 };
 
-const askDeleteItem = (item: IArea | undefined) => {
+const askDeleteItem = (item: IUser | undefined) => {
   state.value.selectedArea = item;
   updateDeleteModal(true);
 };
 
-function askActivateItem(item: IArea | undefined) {
+const askActivateItem = (item: IUser | undefined) => {
   state.value.selectedArea = item;
   updateActivateModal(true);
-}
-
-const confirmDeleteItem = () => {
-  if (state.value.selectedArea) {
-    state.value.areaModal = false;
-    state.value.loading = true;
-    updateDeleteModal(false);
-    Area.deleteById(state.value.selectedArea.id as number)
-      .then((res) => {
-        console.log(res);
-        if (res.status == 204) {
-          state.value.deleteSuccess = true;
-          getAreas();
-        } else {
-          state.value.deleteFailed = true;
-          state.value.loading = false;
-        }
-        state.value.selectedArea = undefined;
-      })
-      .catch((err) => {
-        console.log(err);
-        state.value.deleteFailed = true;
-        state.value.loading = false;
-      });
-  }
 };
 
-const confirmActivateItem = () => {
+const confirmDeleteItem = async () => {
   if (state.value.selectedArea) {
-    state.value.areaModal = false;
     state.value.loading = true;
-    updateActivateModal(false);
-    Area.activateById(state.value.selectedArea.id as number)
-      .then((res) => {
-        console.log(res);
-        if (res.status == 204) {
-          state.value.activateSuccess = true;
-          getAreas();
-        } else {
-          state.value.activateFailed = true;
-          state.value.loading = false;
-        }
-        state.value.selectedArea = undefined;
-      })
-      .catch((err) => {
-        console.log(err);
-        state.value.activateFailed = true;
-        state.value.loading = false;
-      });
+    updateDeleteModal(false);
+    try {
+      const res = await User.deleteById(state.value.selectedArea.id as number);
+      if (res.status === 204) {
+        state.value.deleteSuccess = true;
+        getUsers();
+      } else {
+        state.value.deleteFailed = true;
+      }
+    } catch (err) {
+      console.log(err);
+      state.value.deleteFailed = true;
+    } finally {
+      state.value.loading = false;
+      state.value.selectedArea = undefined;
+    }
   }
 };
 
@@ -157,7 +114,7 @@ const goToCreate = () => {
   router.push("/user/create");
 };
 
-const onSelect = (option: string, item: IArea) => {
+const onSelect = (option: string, item: IUser) => {
   switch (option) {
     case "Detalhes":
       state.value.areaModal = true;
@@ -167,8 +124,6 @@ const onSelect = (option: string, item: IArea) => {
       goToUpdate(item.id);
       break;
     case "Inativar":
-      askDeleteItem(item);
-      break;
     case "Ativar":
       askActivateItem(item);
       break;
@@ -177,16 +132,16 @@ const onSelect = (option: string, item: IArea) => {
 </script>
 
 <template>
-  <main class="areas-list-main">
+  <main class="users-list-main">
     <Titulo content="Usuários" />
-    <p v-if="state.error" class="areaslist-error">
+    <p v-if="state.error" class="userslist-error">
       Um erro interno aconteceu. Tente novamente mais tarde.
     </p>
-    <div class="areaslist-btncontainer">
+    <div class="userslist-btncontainer">
       <v-text-field
         placeholder="Pesquisar..."
         variant="underlined"
-        class="areaslist-btncontainer-searchinput"
+        class="userslist-btncontainer-searchinput"
         v-model="state.search"
         prepend-inner-icon="mdi-magnify"
       ></v-text-field>
@@ -194,11 +149,11 @@ const onSelect = (option: string, item: IArea) => {
         <Botao
           content="Adicionar"
           @click="goToCreate()"
-          class="areaslist-btn"
+          class="userslist-btn"
         />
       </div>
     </div>
-    <div class="areaslist-tablecontainer">
+    <div class="userslist-tablecontainer">
       <v-data-table
         :headers="headers"
         :items="state.items"
@@ -250,7 +205,7 @@ const onSelect = (option: string, item: IArea) => {
     :visible="state.deleteModal"
     :message="`Inativar área ${state.selectedArea?.nome}?`"
     @on-update-modal="updateDeleteModal($event)"
-    @on-confirm="confirmDeleteItem()"
+    @on-confirm="confirmDeleteItem"
   />
 
   <ConfirmModal
@@ -260,7 +215,7 @@ const onSelect = (option: string, item: IArea) => {
     :visible="state.activateModal"
     :message="`Ativar área ${state.selectedArea?.nome}?`"
     @on-update-modal="updateActivateModal($event)"
-    @on-confirm="confirmActivateItem()"
+    
   />
 
   <AreaModal
@@ -287,7 +242,7 @@ const onSelect = (option: string, item: IArea) => {
 </template>
 
 <style scoped>
-.areaslist-btncontainer {
+.userslist-btncontainer {
   display: flex;
   width: 90%;
   margin: 12px auto;
@@ -296,22 +251,22 @@ const onSelect = (option: string, item: IArea) => {
   margin-bottom: -18px;
 }
 
-.areaslist-btncontainer-searchinput {
+.userslist-btncontainer-searchinput {
   flex: 1;
   padding: 0;
 }
 
-.areaslist-btn {
+.userslist-btn {
   width: 200px;
   margin-top: 12px;
 }
 
-.areaslist-tablecontainer {
+.userslist-tablecontainer {
   margin: 12px auto;
   width: 90%;
 }
 
-.areaslist-error {
+.userslist-error {
   color: red;
   text-align: center;
 }

@@ -58,13 +58,14 @@ const onSubmit = () => {
   state.loading = true;
   const action = route.params.id ? "update" : "create";
   User[action]({
-    id: route.params.id ? Number(route.params.id) : undefined,
-    nome: state.nome,
-    email: state.email,
-    matricula: state.matricula,
-    descricao: state.descricao,
-    tipoAcesso: selectedOption.value || "",
-  })
+id: route.params.id ? Number(route.params.id) : undefined,
+nome: state.nome,
+email: state.email,
+matricula: state.matricula,
+descricao: state.descricao,
+tipoAcesso: selectedOption.value || "",
+status: false
+})
     .then((res) => {
       if (res.status !== 201 && res.status !== 200) {
         state.error = true;

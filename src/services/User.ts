@@ -1,7 +1,7 @@
 import type IUser from "@/interfaces/IUser";
 import api from "./api";
 
-class UserService {
+class User {
   async getUsers(): Promise<{ status: number; data: IUser[] }> {
     try {
       const { data, status } = await api.get("/user");
@@ -53,6 +53,4 @@ class UserService {
   }
 }
 
-export default new UserService();
-
-
+export default new User();
