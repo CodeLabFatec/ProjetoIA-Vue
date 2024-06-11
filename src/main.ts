@@ -15,6 +15,7 @@ import { createI18n, useI18n } from "vue-i18n";
 
 import VueApexCharts from "vue3-apexcharts";
 import apexPt from '@/assets/apex-charts-pt-language.json';
+import { createPinia } from "pinia";
 
 const messages = {
   en: {
@@ -40,11 +41,13 @@ const vuetify = createVuetify({
   },
 });
 
+const pinia = createPinia();
 
 const app = createApp(App);
 
 app.use(router);
 app.use(vuetify);
+app.use(pinia);
 app.use(VueApexCharts);
 
 window.Apex.chart = {
