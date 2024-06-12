@@ -8,8 +8,9 @@ class Redzone {
     try {
       const params = {} as any;
       if (area_id) params.areaId = area_id;
-      const { data, status } = await api.get("/redzone", { params });
-
+      const response = await api.get("/redzone", { params });
+      const { data, status } = response
+      console.log(response)
       // for tests only
       // const area = {
       //   id: 1,

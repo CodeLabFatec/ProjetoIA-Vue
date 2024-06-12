@@ -36,8 +36,8 @@
               title="Usuários"
             ></v-list-item>
           </template>
-          <v-list-item @click="goTo('users')">Lista de Usuários</v-list-item>
-          <v-list-item @click="goTo('users/create')"
+          <v-list-item @click="goTo('user')">Lista de Usuários</v-list-item>
+          <v-list-item @click="goTo('user/create')"
             >Cadastro de usuários</v-list-item
           >
         </v-list-group>

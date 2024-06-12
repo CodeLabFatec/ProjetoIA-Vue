@@ -1,10 +1,11 @@
 export default interface IUser {
-    id?: number;
+  id?: number;
+  nome: string;
+  email: string;
+  papel: {
+    id: number;
     nome: string;
-    email: string;
-    matricula: string;
     descricao: string;
-    tipoAcesso: string;
-    status: boolean;
-  }
-  
+  };
+  status: boolean;
+}

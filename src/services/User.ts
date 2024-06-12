@@ -2,6 +2,10 @@ import type IUser from "@/interfaces/IUser";
 import api from "./api";
 
 class User {
+activateById(arg0: number) {
+throw new Error("Method not implemented.");
+}
+[x: string]: any;
   async getUsers(): Promise<{ status: number; data: IUser[] }> {
     try {
       const { data, status } = await api.get("/user");

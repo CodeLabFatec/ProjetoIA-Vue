@@ -6,7 +6,7 @@ import Titulo from "@/components/Titulo.vue";
 import Botao from "@/components/Botao.vue";
 import OpcoesBtn from "@/components/OpcoesBtn.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import AreaModal from "@/components/AreaModal.vue";
+import UserModal from "@/components/UserModal.vue";
 
 import User from "@/services/User";
 
@@ -19,14 +19,14 @@ const state = ref({
   error: false,
   loading: false,
   search: "",
+  userModal: false,
   deleteModal: false,
-  activateModal: false,
-  selectedArea: undefined as IUser | undefined,
   deleteFailed: false,
   deleteSuccess: false,
-  areaModal: false,
-  activateFailed: false,
-  activateSuccess: false,
+  activateModal: false, // Add this line
+  activateFailed: false, // Add this line
+  activateSuccess: false, // Add this line
+  selectedUser: undefined as IUser | undefined,
 });
 
 const getUsers = async () => {
@@ -38,7 +38,7 @@ const getUsers = async () => {
     if (status === 200 && Array.isArray(data)) {
       state.value.items = data.map((item) => ({
         ...item,
-        status_str: item.status ? "Ativo" : "Inativo",
+        tipoAcesso_str: item.papel.nome
       }));
     } else {
       state.value.error = true;
@@ -59,37 +59,37 @@ const headers = [
   { key: "id", title: "", sortable: false, width: 0 },
   { key: "nome", title: "Usuário" },
   { key: "email", title: "E-mail" },
-  { key: "status_str", title: "Tipo de Acesso" },
+  { key: "tipoAcesso_str", title: "Tipo de Acesso" },
 ];
 
 const updateDeleteModal = (new_state: boolean) => {
   state.value.deleteModal = new_state;
 };
 
-const updateActivateModal = (new_state: boolean) => {
+const updateAreaModal = (new_state: boolean) => {
+  state.value.userModal = new_state;
+};
+
+const updateActivateModal = (new_state: boolean) => { // Add this function
   state.value.activateModal = new_state;
 };
 
-const updateAreaModal = (new_state: boolean) => {
-  state.value.areaModal = new_state;
-};
-
 const askDeleteItem = (item: IUser | undefined) => {
-  state.value.selectedArea = item;
+  state.value.selectedUser = item;
   updateDeleteModal(true);
 };
 
 const askActivateItem = (item: IUser | undefined) => {
-  state.value.selectedArea = item;
+  state.value.selectedUser = item;
   updateActivateModal(true);
 };
 
 const confirmDeleteItem = async () => {
-  if (state.value.selectedArea) {
+  if (state.value.selectedUser) {
     state.value.loading = true;
     updateDeleteModal(false);
     try {
-      const res = await User.deleteById(state.value.selectedArea.id as number);
+      const res = await User.deleteById(state.value.selectedUser.id as number);
       if (res.status === 204) {
         state.value.deleteSuccess = true;
         getUsers();
@@ -101,10 +101,32 @@ const confirmDeleteItem = async () => {
       state.value.deleteFailed = true;
     } finally {
       state.value.loading = false;
-      state.value.selectedArea = undefined;
+      state.value.selectedUser = undefined;
     }
   }
 };
+
+// const confirmActivateItem = async () => { // Add this function
+//   if (state.value.selectedUser) {
+//     state.value.loading = true;
+//     updateActivateModal(false);
+//     try {
+//       const res = await User.activateById(state.value.selectedUser.id as number); // Assuming you have an API to activate
+//       if (res.status === 200) {
+//         state.value.activateSuccess = true;
+//         getUsers();
+//       } else {
+//         state.value.activateFailed = true;
+//       }
+//     } catch (err) {
+//       console.log(err);
+//       state.value.activateFailed = true;
+//     } finally {
+//       state.value.loading = false;
+//       state.value.selectedUser = undefined;
+//     }
+//   }
+// };
 
 const goToUpdate = (id: number | undefined) => {
   router.push(`/user/update/${id || ""}`);
@@ -117,8 +139,8 @@ const goToCreate = () => {
 const onSelect = (option: string, item: IUser) => {
   switch (option) {
     case "Detalhes":
-      state.value.areaModal = true;
-      state.value.selectedArea = item;
+      state.value.userModal = true;
+      state.value.selectedUser = item;
       break;
     case "Editar":
       goToUpdate(item.id);
@@ -162,35 +184,22 @@ const onSelect = (option: string, item: IUser) => {
       >
         <template v-slot:item.id="{ item }">
           <OpcoesBtn
-            :items="['Detalhes', 'Editar', item.status ? 'Inativar' : 'Ativar']"
+            :items="['Detalhes', 'Editar']"
             @on-select="onSelect($event, item)"
           />
         </template>
-        <template v-slot:item.status_str="{ item }">
-          <div v-if="item.status">
+        <template v-slot:item.tipoAcesso_str="{ item }">
+          <div>
             <p
               style="
-                color: white;
-                background-color: green;
-                width: 50px;
+                display: flex;
+                justify-content: start;
+                width: 180px;
                 text-align: center;
                 border-radius: 3px;
               "
             >
-              Ativo
-            </p>
-          </div>
-          <div v-if="!item.status">
-            <p
-              style="
-                color: white;
-                background-color: red;
-                width: 50px;
-                text-align: center;
-                border-radius: 3px;
-              "
-            >
-              Inativo
+              {{ item.papel.nome }}
             </p>
           </div>
         </template>
@@ -203,42 +212,27 @@ const onSelect = (option: string, item: IUser) => {
     msg_cancel="cancelar"
     msg_confirm="confirmar"
     :visible="state.deleteModal"
-    :message="`Inativar área ${state.selectedArea?.nome}?`"
+    :message="`Inativar área ${state.selectedUser?.nome}?`"
     @on-update-modal="updateDeleteModal($event)"
     @on-confirm="confirmDeleteItem"
   />
 
   <ConfirmModal
-    title="Confirmar ativação?"
+    title="Confirmar ativação?" 
     msg_cancel="cancelar"
     msg_confirm="confirmar"
-    :visible="state.activateModal"
-    :message="`Ativar área ${state.selectedArea?.nome}?`"
-    @on-update-modal="updateActivateModal($event)"
-    
+    :visible="state.activateModal" 
+    :message="`Ativar área ${state.selectedUser?.nome}?`" 
+    @on-update-modal="updateActivateModal($event)" 
   />
 
-  <AreaModal
-    :visible="state.areaModal"
-    :area="state.selectedArea"
+  <UserModal
+    :visible="state.userModal"
     @on-update-modal="updateAreaModal($event)"
-    @on-delete-request="askDeleteItem(state.selectedArea)"
-    @on-update-request="goToUpdate(state.selectedArea?.id)"
-    @on-activate-request="askActivateItem(state.selectedArea)"
+    @on-delete-request="askDeleteItem(state.selectedUser)"
+    @on-update-request="goToUpdate(state.selectedUser?.id)"
+    @on-activate-request="askActivateItem(state.selectedUser)"
   />
-
-  <v-snackbar color="red" v-model="state.deleteFailed">
-    Não foi possível inativar a área. Tente novamente mais tarde.
-  </v-snackbar>
-  <v-snackbar color="green" v-model="state.deleteSuccess">
-    Área inativada com sucesso.
-  </v-snackbar>
-  <v-snackbar color="red" v-model="state.activateFailed">
-    Não foi possível ativar a área. Tente novamente mais tarde.
-  </v-snackbar>
-  <v-snackbar color="green" v-model="state.activateSuccess">
-    Área ativada com sucesso.
-  </v-snackbar>
 </template>
 
 <style scoped>

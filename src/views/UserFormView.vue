@@ -13,9 +13,11 @@ const route = useRoute();
 const state = reactive({
   nome: "",
   email: "",
-  matricula: "",
-  descricao: "",
-  tipoAcesso: "",
+  papel: {
+    id: 0,
+    nome: "",
+    descricao: ""
+  },
   loading: false,
   error: false,
   success: false,
@@ -23,7 +25,7 @@ const state = reactive({
 });
 
 const selectedOption = ref<string | null>(null);
-const options = ["Administrador", "Guarda"];
+const options = ["Administrador", "Gerente de Segurança", "Segurança"];
 
 onMounted(() => {
   if (route.params.id) {
@@ -33,16 +35,15 @@ onMounted(() => {
         if (res.status === 200 && res.data) {
           state.nome = res.data.nome;
           state.email = res.data.email;
-          state.matricula = res.data.matricula;
-          state.descricao = res.data.descricao;
-          state.tipoAcesso = res.data.tipoAcesso;
+          state.papel.nome = res.data.papel.nome;
+          selectedOption.value = res.data.papel.nome;
         } else {
           state.error = true;
         }
         state.loading = false;
       })
       .catch((err) => {
-        console.log(err);
+        console.log("Error fetching user data:", err);
         state.error = true;
         state.loading = false;
       });
@@ -50,22 +51,29 @@ onMounted(() => {
 });
 
 const onSubmit = () => {
-  if (!state.nome || !state.email || !state.matricula) {
+  if (!state.nome || !state.email || !selectedOption.value) {
     state.invalid = true;
     return;
   }
 
   state.loading = true;
   const action = route.params.id ? "update" : "create";
-  User[action]({
-id: route.params.id ? Number(route.params.id) : undefined,
-nome: state.nome,
-email: state.email,
-matricula: state.matricula,
-descricao: state.descricao,
-tipoAcesso: selectedOption.value || "",
-status: false
-})
+  const payload: any = {
+    nome: state.nome,
+    email: state.email,
+    papel: {
+      nome: selectedOption.value,
+      id: 0,
+      descricao: ""
+    },
+    status: false
+  };
+
+  if (route.params.id) {
+    payload.id = Number(route.params.id);
+  }
+
+  User[action](payload)
     .then((res) => {
       if (res.status !== 201 && res.status !== 200) {
         state.error = true;
@@ -79,7 +87,7 @@ status: false
       state.loading = false;
     })
     .catch((err) => {
-      console.log(err);
+      console.log("Error submitting form:", err);
       state.error = true;
       state.loading = false;
     });
@@ -88,9 +96,7 @@ status: false
 const reset = () => {
   state.nome = "";
   state.email = "";
-  state.matricula = "";
-  state.descricao = "";
-  state.tipoAcesso = "";
+  state.papel.nome = "";
   selectedOption.value = null;
   state.invalid = false;
   state.error = false;
@@ -144,14 +150,6 @@ const clearError = () => {
           variant="outlined"
           label="E-mail*"
           v-model="state.email"
-        ></v-text-field>
-        <v-text-field
-          @update:focused="clearError"
-          :error-messages="state.invalid ? 'Campo obrigatório' : ''"
-          :readonly="state.loading"
-          variant="outlined"
-          label="Matrícula*"
-          v-model="state.matricula"
         ></v-text-field>
       </div>
       <div class="userform-containerbtn">
