@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import ExternalContainer from '@/components/ExternalContainer.vue'
 import Autenticacao from '@/services/Autenticacao';
-import { ref } from 'vue';
+import { usuarioStore } from '@/stores/usuarioStore';
+import getStorage from '@/utils/getStorage';
+import removeStorage from '@/utils/removeStorage';
+import saveStorage from '@/utils/saveStorage';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const SUCCESS_STATUS = 200;
 const UNAUTH_STATUS = 401;
 
 const router = useRouter();
+
+const userStore = usuarioStore();
 
 const state = ref({
   email: '',
@@ -22,9 +28,13 @@ const submit = () => {
   const { email, senha } = state.value;
   Autenticacao.login({ email, senha })
     .then(res => {
-      const { status } = res;
-      if (status == SUCCESS_STATUS) {
-        router.push('/');
+      const { data, status } = res;
+      if (status == SUCCESS_STATUS && data) {
+        saveStorage('usuario', data);
+        userStore.setUsuario(data);
+        const path = getStorage('toPath', 'session') as {toPath: string};
+        router.push(path ? path.toPath : '/');
+        removeStorage('toPath', 'session')
       } else if (status == UNAUTH_STATUS) {
         state.value.error = true;
       } else {
@@ -32,8 +42,12 @@ const submit = () => {
       }
     })
     .catch(err => {
-      console.log(err);
-      state.value.serverError = true;
+      if (err.response.status == UNAUTH_STATUS) {
+        state.value.error = true;
+      } else {
+        console.log(err);
+        state.value.serverError = true;
+      }
     })
     .finally(() => {
       state.value.loading = false;
@@ -49,6 +63,11 @@ const onFocus = () => {
   state.value.serverError = false;
 }
 
+onMounted(() => {
+  if (userStore.usuario) {
+    router.push('/')
+  }
+})
 </script>
 
 <template>
@@ -57,10 +76,10 @@ const onFocus = () => {
       <div class="main">
         <h1 class="title">Login</h1>
         <form @submit.prevent="submit" class="form">
-          <v-text-field :disabled="state.loading" @update:focused="onFocus" :error="state.error" class="input" label="E-mail" variant="outlined"
-            v-model="state.email" type="email" required></v-text-field>
-          <v-text-field :disabled="state.loading" :error="state.error" @update:focused="onFocus" class="input" label="Senha" variant="outlined"
-            v-model="state.senha" type="password" required></v-text-field>
+          <v-text-field :disabled="state.loading" @update:focused="onFocus" :error="state.error" class="input"
+            label="E-mail" variant="outlined" v-model="state.email" type="email" required></v-text-field>
+          <v-text-field :disabled="state.loading" :error="state.error" @update:focused="onFocus" class="input"
+            label="Senha" variant="outlined" v-model="state.senha" type="password" required></v-text-field>
           <div class="btns">
             <button type="button" :disabled="state.loading" @click="goToChangePassword">Esqueci minha senha</button>
             <v-btn type="submit" color="#003365" :loading="state.loading">Entrar</v-btn>
@@ -103,4 +122,4 @@ const onFocus = () => {
   color: rgb(255, 124, 124);
   text-align: center;
 }
-</style>
+</style>@/utils/saveStorage

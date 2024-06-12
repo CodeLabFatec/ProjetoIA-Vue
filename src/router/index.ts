@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+
 import RedzonesListView from "@/views/RedzonesListView.vue";
 import RedzonesFormView from "@/views/RedzonesFormView.vue";
 import DashboardView from "@/views/DashboardView.vue";
@@ -7,6 +8,11 @@ import AreaFormView from "@/views/AreaFormView.vue";
 import LoginView from "@/views/LoginView.vue";
 import RecoverPasswordView from "@/views/RecoverPasswordView.vue";
 import UpdatePasswordView from "@/views/UpdatePasswordView.vue";
+import NotFoundView from '@/views/NotFoundView.vue'
+
+import saveStorage from '@/utils/saveStorage'
+
+import { usuarioStore } from '@/stores/usuarioStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,36 +21,57 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: DashboardView,
+      meta: {
+        users: [1, 2, 3]
+      },
     },
     {
       path: "/redzones",
       name: "redzones",
       component: RedzonesListView,
+      meta: {
+        users: [1]
+      }
     },
     {
       path: "/redzones/create",
       name: "create redzone",
       component: RedzonesFormView,
+      meta: {
+        users: [1]
+      },
     },
     {
       path: "/redzones/update/:id",
       name: "update redzone",
       component: RedzonesFormView,
+      meta: {
+        users: [1]
+      },
     },
     {
       path: "/area/create",
       name: "create area",
       component: AreaFormView,
+      meta: {
+        users: [1]
+      }
     },
     {
       path: "/area",
       name: "area",
       component: AreaListView,
+      meta: {
+        users: [1]
+      }
     },
     {
       path: "/area/update/:id",
       name: "update area",
       component: AreaFormView,
+      meta: {
+        users: [1]
+      },
     },
     {
       path: "/auth",
@@ -61,7 +88,31 @@ const router = createRouter({
       name: "update password",
       component: UpdatePasswordView,
     },
-  ],
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not found',
+      component: NotFoundView,
+    }
+  ]
 });
+
+router.beforeEach((to, from, next) => {
+  const {usuario} = usuarioStore();
+
+  if (to.matched.some(record => record.meta.users)) {
+    if (usuario) {
+      if ((to.meta.users as number[]).includes(usuario.papel.id)) {
+        next();
+      } else {
+        next({name: 'not found'});
+      }
+    } else {
+      saveStorage('toPath', {toPath: to.path}, 'session');
+      next({name: 'login'});
+    }
+  } else {
+    next();
+  }
+})
 
 export default router;
