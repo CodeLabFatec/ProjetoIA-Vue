@@ -5,6 +5,7 @@ import GraficoPessoasDia from '@/components/GraficoPessoasDia.vue'
 import Titulo from '@/components/Titulo.vue';
 import Indicador from '@/components/Indicador.vue';
 import LoadingBar from '@/components/LoadingBar.vue';
+import SeletorData from '@/components/SeletorData.vue';
 
 import Dashboard from '@/services/Dashboard';
 import Redzone from '@/services/Redzone';
@@ -14,7 +15,10 @@ import Area from '@/services/Area';
 import type IDashboardResponse from "@/interfaces/IDashboardResponse";
 import type IRedzone from '@/interfaces/IRedzone';
 import type IArea from '@/interfaces/IArea';
-import SeletorData from '@/components/SeletorData.vue';
+
+import { usuarioStore } from '@/stores/usuarioStore';
+
+const { usuario } = usuarioStore();
 
 const state = ref({
   graphic_data: {} as IDashboardResponse,
@@ -74,9 +78,7 @@ watch(() => [state.value.refresh], newValue => {
       state.value.refresh = true;
     }
   }, 5000);
-})
-
-watch(() => [state.value.graphic_data.tabela], newValue => console.log(newValue))
+});
 
 const refreshDashboard = () => {
   Dashboard.refreshDashboard({
@@ -272,7 +274,7 @@ const exportPdf = () => {
 onMounted(() => {
   getDashboard();
   getRedzones();
-  getAreas();
+  usuario?.papel.id || 4 < 3 && getAreas();
 
   state.value.refresh = false;
 });
@@ -305,7 +307,7 @@ onMounted(() => {
         Redzone: <b>{{ state.selectedRedzone == 'Todos' ? 'Todos' : `${state.selectedRedzone.split('-')[1]} [ ID:
           ${state.selectedRedzone.split('-')[0]} ]` }}</b>
       </div>
-      <div class="dashboard-header-printeable-subtitle">
+      <div v-if="(usuario?.papel.id || 3) !== 3" class="dashboard-header-printeable-subtitle">
         Área: <b>{{ state.selectedArea == 'Todos' && state.selectedRedzone == 'Todos' ? 'Todas' : (
           state.selectedArea !== 'Todos' ?
           `${state.selectedArea.split('-')[1]} [ ID: ${state.selectedArea.split('-')[0]} ]`
@@ -324,7 +326,7 @@ onMounted(() => {
     <div class="dashboard-content">
       <div class="dashboard-filters">
         <div class="dashboard-selector-container">
-          <div class="dashboard-selector">
+          <div v-if="(usuario?.papel.id || 3) !== 3" class="dashboard-selector">
             <v-select color="#004488" label="Área" variant="underlined" :items="state.areasSelector"
               v-model="state.selectedArea" @update:model-value="handleAreaSelector"></v-select>
           </div>
