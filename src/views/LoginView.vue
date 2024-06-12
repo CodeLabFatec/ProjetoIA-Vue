@@ -2,7 +2,10 @@
 import ExternalContainer from '@/components/ExternalContainer.vue'
 import Autenticacao from '@/services/Autenticacao';
 import { usuarioStore } from '@/stores/usuarioStore';
-import { ref } from 'vue';
+import getStorage from '@/utils/getStorage';
+import removeStorage from '@/utils/removeStorage';
+import saveStorage from '@/utils/saveStorage';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const SUCCESS_STATUS = 200;
@@ -27,8 +30,11 @@ const submit = () => {
     .then(res => {
       const { data, status } = res;
       if (status == SUCCESS_STATUS && data) {
+        saveStorage('usuario', data);
         userStore.setUsuario(data);
-        router.push('/');
+        const path = getStorage('toPath', 'session') as {toPath: string};
+        router.push(path ? path.toPath : '/');
+        removeStorage('toPath', 'session')
       } else if (status == UNAUTH_STATUS) {
         state.value.error = true;
       } else {
@@ -57,6 +63,11 @@ const onFocus = () => {
   state.value.serverError = false;
 }
 
+onMounted(() => {
+  if (userStore.usuario) {
+    router.push('/')
+  }
+})
 </script>
 
 <template>
@@ -111,4 +122,4 @@ const onFocus = () => {
   color: rgb(255, 124, 124);
   text-align: center;
 }
-</style>
+</style>@/utils/saveStorage
