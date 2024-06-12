@@ -2,30 +2,67 @@
   <v-app theme="">
     <v-navigation-drawer class="sidebar" v-model="isDrawerOpen" temporary>
       <div class="nav-icon-container">
-        <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon
+          @click="isDrawerOpen = !isDrawerOpen"
+        ></v-app-bar-nav-icon>
       </div>
       <v-list v-model:opened="open" active-class="active-item">
-        <v-list-item @click="goTo('')" prepend-icon="mdi-home">Home</v-list-item>
+        <v-list-item @click="goTo('')" prepend-icon="mdi-home"
+          >Home</v-list-item
+        >
         <v-list-group value="Redzones">
           <template v-slot:activator="{ props }">
-            <v-list-item v-bind="props" prepend-icon="mdi-plus-circle" title="Redzones"></v-list-item>
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-plus-circle"
+              title="Redzones"
+            ></v-list-item>
           </template>
           <v-list-item @click="goTo('redzones')">Lista de Redzones</v-list-item>
-          <v-list-item @click="goTo('redzones/create')">Cadastro de redzones</v-list-item>
+          <v-list-item @click="goTo('redzones/create')"
+            >Cadastro de redzones</v-list-item
+          >
         </v-list-group>
         <v-list-group value="Áreas">
           <template v-slot:activator="{ props }">
-            <v-list-item v-bind="props" prepend-icon="mdi-plus-circle" title="Áreas"></v-list-item>
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-plus-circle"
+              title="Áreas"
+            ></v-list-item>
           </template>
           <v-list-item @click="goTo('area')">Lista de Áreas</v-list-item>
-          <v-list-item @click="goTo('area/create')">Cadastro de áreas</v-list-item>
+          <v-list-item @click="goTo('area/create')"
+            >Cadastro de áreas</v-list-item
+          >
         </v-list-group>
-        <v-list-item @click="exit()" prepend-icon="mdi-logout">Sair</v-list-item>
+
+        <v-list-group value="Usuários">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-account-circle"
+              title="Usuários"
+            ></v-list-item>
+          </template>
+          <v-list-item @click="goTo('user')">Lista de Usuários</v-list-item>
+          <v-list-item @click="goTo('user/create')"
+            >Cadastro de usuários</v-list-item
+          >
+        </v-list-group>
+        <v-list-item @click="exit()" prepend-icon="mdi-logout"
+          >Sair</v-list-item
+        >
       </v-list>
     </v-navigation-drawer>
 
-    <header v-if="path !== '/auth' && path !== '/change-password' && !isNotFound" class="container">
-      <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
+    <header
+      v-if="path !== '/auth' && path !== '/change-password' && !isNotFound"
+      class="container"
+    >
+      <v-app-bar-nav-icon
+        @click="isDrawerOpen = !isDrawerOpen"
+      ></v-app-bar-nav-icon>
       <img src="../assets/logo.png" alt="Altave" />
     </header>
     <slot></slot>
@@ -45,7 +82,7 @@ export default {
       open: ["Redzones"],
       isDrawerOpen: false,
       router: useRouter(),
-      path: ref(''),
+      path: ref(""),
       isNotFound: ref(false),
       userStore: usuarioStore(),
     };
@@ -57,17 +94,17 @@ export default {
     },
     exit() {
       this.userStore.setUsuario(undefined);
-      removeStorage('usuario');
-      this.router.push('/auth');
+      removeStorage("usuario");
+      this.router.push("/auth");
     },
   },
   mounted() {
     watch(
       () => this.router.currentRoute,
-      newRoute => {
+      (newRoute) => {
         this.path = newRoute.path;
-        this.isNotFound = this.router.currentRoute.name == 'not found';
-      },
+        this.isNotFound = this.router.currentRoute.name == "not found";
+      }
     );
   },
 };
