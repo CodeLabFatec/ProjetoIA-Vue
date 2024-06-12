@@ -20,7 +20,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <header v-if="path !== '/auth' && path !== '/change-password'" class="container">
+    <header v-if="path !== '/auth' && path !== '/change-password' && !isNotFound" class="container">
       <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen"></v-app-bar-nav-icon>
       <img src="../assets/logo.png" alt="Altave" />
     </header>
@@ -29,6 +29,7 @@
 </template>
 
 <script lang="ts">
+import { usuarioStore } from "@/stores/usuarioStore";
 import { watch } from "vue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
@@ -40,6 +41,8 @@ export default {
       isDrawerOpen: false,
       router: useRouter(),
       path: ref(''),
+      isNotFound: ref(false),
+      userStore: usuarioStore(),
     };
   },
   methods: {
@@ -51,7 +54,10 @@ export default {
   mounted() {
     watch(
       () => this.router.currentRoute,
-      newRoute => this.path = newRoute.path,
+      newRoute => {
+        this.path = newRoute.path;
+        this.isNotFound = this.router.currentRoute.name == 'not found';
+      },
     );
   },
 };
