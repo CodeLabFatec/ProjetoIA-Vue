@@ -207,25 +207,6 @@ const onSelect = (option: string, item: IUser) => {
     </div>
   </main>
 
-  <ConfirmModal
-    title="Confirmar inativação?"
-    msg_cancel="cancelar"
-    msg_confirm="confirmar"
-    :visible="state.deleteModal"
-    :message="`Inativar área ${state.selectedUser?.nome}?`"
-    @on-update-modal="updateDeleteModal($event)"
-    @on-confirm="confirmDeleteItem"
-  />
-
-  <ConfirmModal
-    title="Confirmar ativação?" 
-    msg_cancel="cancelar"
-    msg_confirm="confirmar"
-    :visible="state.activateModal" 
-    :message="`Ativar área ${state.selectedUser?.nome}?`" 
-    @on-update-modal="updateActivateModal($event)" 
-  />
-
   <UserModal
     :visible="state.userModal"
     @on-update-modal="updateAreaModal($event)"
