@@ -15,11 +15,7 @@ export default {
       default: undefined,
     },
   },
-  emits: [
-    "onDeleteRequest",
-    "onUpdateRequest",
-    "OnUpdateModal",
-  ],
+  emits: ["onDeleteRequest", "onUpdateRequest", "OnUpdateModal"],
   data() {
     return {
       dialog: this.visible,
@@ -43,7 +39,7 @@ export default {
     @update:model-value="$emit('OnUpdateModal', $event)"
   >
     <v-card max-width="600px">
-      <div class="usermodal-title">
+      <div class="areamodal-title">
         <v-card-title class="d-flex justify-space-between align-center">
           <div>
             {{ $props.user?.nome || "" }}
@@ -56,10 +52,12 @@ export default {
           </v-btn>
         </v-card-title>
       </div>
-      <div class="usermodal-btn-container">
+      <div class="areamodal-desc">
+        {{ $props.user?.email }}
+      </div>
+      <div class="areamodal-btn-container">
         <Botao
-          v-if="$props.user?.status"
-          content="Inativar"
+          content="Excluir"
           color="alert"
           @click="$emit('onDeleteRequest')"
         />
@@ -70,14 +68,19 @@ export default {
 </template>
 
 <style scoped>
-.usermodal-title {
+.areamodal-title {
   padding-inline: 4px;
 }
 
-.usermodal-btn-container {
+.areamodal-btn-container {
   display: flex;
   flex-direction: row-reverse;
   gap: 16px;
   padding: 22px;
+}
+
+.areamodal-desc {
+  padding-inline: 22px;
+  text-align: justify;
 }
 </style>

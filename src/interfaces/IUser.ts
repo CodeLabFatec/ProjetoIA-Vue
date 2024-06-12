@@ -1,3 +1,6 @@
+import type IArea from "./IArea";
+import type IRedzone from "./IRedzone";
+
 export default interface IUser {
   id?: number;
   nome: string;
@@ -7,5 +10,6 @@ export default interface IUser {
     nome: string;
     descricao: string;
   };
-  status: boolean;
+  areas?: IArea[];
+  redzones?: IRedzone[];
 }
