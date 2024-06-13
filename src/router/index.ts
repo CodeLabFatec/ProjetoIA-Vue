@@ -127,7 +127,7 @@ router.beforeEach((to, from, next) => {
 
   if (to.matched.some((record) => record.meta.users)) {
     if (usuario) {
-      if ((to.meta.users as number[]).includes(usuario.papel.id)) {
+      if ((to.meta.users as number[]).includes(usuario.idPapel)) {
         next();
       } else {
         next({ name: "not found" });
