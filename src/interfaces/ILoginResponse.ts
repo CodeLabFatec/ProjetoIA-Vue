@@ -7,6 +7,6 @@ interface IPapel {
 export interface ILoginResponse {
   nome: string;
   email: string;
-  papel: IPapel;
+  idPapel: number;
   token: string;
 }
