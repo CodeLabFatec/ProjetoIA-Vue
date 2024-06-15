@@ -9,7 +9,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const SUCCESS_STATUS = 200;
-const UNAUTH_STATUS = 401;
+const UNAUTH_STATUS = 403;
 
 const router = useRouter();
 
