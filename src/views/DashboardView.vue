@@ -166,42 +166,52 @@ const refreshDashboard = () => {
 };
 
 const getRedzones = (area_id?: number) => {
-  state.value.loading = true;
-  Redzone.getRedzones(area_id)
-    .then((res) => {
-      if (res.status == 200) {
-        state.value.redzones = res.data;
-      } else {
+  if (!usuario) return;
+  if (usuario?.idPapel == 1 && !usuario.redzones.length) {
+    state.value.loading = true;
+    Redzone.getRedzones(area_id)
+      .then((res) => {
+        if (res.status == 200) {
+          state.value.redzones = res.data;
+        } else {
+          state.value.error = true;
+          console.log(res);
+        }
+        state.value.loading = false;
+      })
+      .catch((err) => {
+        console.log(err);
         state.value.error = true;
-        console.log(res);
-      }
-      state.value.loading = false;
-    })
-    .catch((err) => {
-      console.log(err);
-      state.value.error = true;
-      state.value.loading = false;
-    });
+        state.value.loading = false;
+      });
+  } else {
+    state.value.redzones = usuario?.redzones as IRedzone[] || [];
+  }
 };
 
 const getAreas = () => {
-  state.value.loading = true;
-  Area.getAreas()
-    .then((res) => {
-      if (res.status == 200) {
-        state.value.areas = res.data;
-        state.value.loading = false;
-      } else {
-        console.log(res);
+  if (!usuario) return;
+  if (usuario.idPapel == 1 && !usuario.areas.length) {
+    state.value.loading = true;
+    Area.getAreas()
+      .then((res) => {
+        if (res.status == 200) {
+          state.value.areas = res.data;
+          state.value.loading = false;
+        } else {
+          console.log(res);
+          state.value.error = true;
+          state.value.loading = false;
+        }
+      })
+      .catch((err) => {
+        console.log(err);
         state.value.error = true;
         state.value.loading = false;
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      state.value.error = true;
-      state.value.loading = false;
-    });
+      });
+  } else {
+    state.value.areas = usuario?.areas as IArea[];
+  }
 };
 
 const getDashboard = () => {
@@ -301,7 +311,7 @@ const exportPdf = () => {
 onMounted(() => {
   getDashboard();
   getRedzones();
-  usuario?.idPapel || (4 < 3 && getAreas());
+  usuario && usuario.idPapel !== 3 && getAreas();
 
   state.value.refresh = false;
 });
