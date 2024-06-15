@@ -10,7 +10,7 @@
         <v-list-item @click="goTo('')" prepend-icon="mdi-home"
           >Home</v-list-item
         >
-        <v-list-group value="Redzones">
+        <v-list-group v-if="userStore.usuario?.idPapel == 1" value="Redzones">
           <template v-slot:activator="{ props }">
             <v-list-item
               v-bind="props"
@@ -23,7 +23,7 @@
             >Cadastro de redzones</v-list-item
           >
         </v-list-group>
-        <v-list-group value="Áreas">
+        <v-list-group v-if="userStore.usuario?.idPapel == 1" value="Áreas">
           <template v-slot:activator="{ props }">
             <v-list-item
               v-bind="props"
@@ -37,7 +37,7 @@
           >
         </v-list-group>
 
-        <v-list-group value="Usuários">
+        <v-list-group v-if="userStore.usuario?.idPapel == 1" value="Usuários">
           <template v-slot:activator="{ props }">
             <v-list-item
               v-bind="props"
