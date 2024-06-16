@@ -10,7 +10,7 @@
         <v-list-item @click="goTo('')" prepend-icon="mdi-home"
           >Home</v-list-item
         >
-        <v-list-group value="Redzones e Áreas">
+        <v-list-group v-if="userStore.usuario?.idPapel == 1" value="Redzones">
           <template v-slot:activator="{ props }">
             <v-list-item
               v-bind="props"
@@ -22,17 +22,49 @@
           <v-list-item @click="goTo('redzones/create')"
             >Cadastro de redzones</v-list-item
           >
+        </v-list-group>
+        <v-list-group v-if="userStore.usuario?.idPapel == 1" value="Áreas">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-plus-circle"
+              title="Áreas"
+            ></v-list-item>
+          </template>
           <v-list-item @click="goTo('area')">Lista de Áreas</v-list-item>
           <v-list-item @click="goTo('area/create')"
             >Cadastro de áreas</v-list-item
           >
-          <!-- <v-list-item>Cadastro de áreas</v-list-item> -->
         </v-list-group>
-        <!-- <v-list-item prepend-icon="mdi-account">Cadastros</v-list-item> -->
+
+        <v-list-group v-if="userStore.usuario?.idPapel == 1" value="Usuários">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-account-circle"
+              title="Usuários"
+            ></v-list-item>
+          </template>
+          <v-list-item @click="goTo('user')">Lista de Usuários</v-list-item>
+          <v-list-item @click="goTo('user/create')"
+            >Cadastro de usuários</v-list-item
+          >
+        </v-list-group>
+        <v-list-item
+          @click="goTo('update-password')"
+          prepend-icon="mdi-account-cog"
+          >Trocar Senha</v-list-item
+        >
+        <v-list-item @click="exit()" prepend-icon="mdi-logout"
+          >Sair</v-list-item
+        >
       </v-list>
     </v-navigation-drawer>
 
-    <header class="container">
+    <header
+      v-if="path !== '/auth' && path !== '/recover-password' && !isNotFound"
+      class="container"
+    >
       <v-app-bar-nav-icon
         @click="isDrawerOpen = !isDrawerOpen"
       ></v-app-bar-nav-icon>
@@ -43,6 +75,10 @@
 </template>
 
 <script lang="ts">
+import { usuarioStore } from "@/stores/usuarioStore";
+import removeStorage from "@/utils/removeStorage";
+import { watch } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
@@ -51,6 +87,9 @@ export default {
       open: ["Redzones"],
       isDrawerOpen: false,
       router: useRouter(),
+      path: ref(""),
+      isNotFound: ref(false),
+      userStore: usuarioStore(),
     };
   },
   methods: {
@@ -58,6 +97,20 @@ export default {
       this.router.push(`/${path}`);
       this.isDrawerOpen = false;
     },
+    exit() {
+      this.userStore.setUsuario(undefined);
+      removeStorage("usuario");
+      this.router.push("/auth");
+    },
+  },
+  mounted() {
+    watch(
+      () => this.router.currentRoute,
+      (newRoute) => {
+        this.path = newRoute.path;
+        this.isNotFound = this.router.currentRoute.name == "not found";
+      }
+    );
   },
 };
 </script>
@@ -84,6 +137,7 @@ export default {
   justify-content: flex-end;
   padding-right: 16px;
 }
+
 .sidebar {
   background-color: var(--gray);
   color: white;
@@ -93,6 +147,7 @@ export default {
 a {
   text-decoration: none;
 }
+
 .v-list-item {
   color: white;
   transition: all 0.3s ease;
