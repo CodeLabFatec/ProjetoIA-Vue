@@ -50,6 +50,11 @@
             >Cadastro de usuários</v-list-item
           >
         </v-list-group>
+        <v-list-item
+          @click="goTo('update-password')"
+          prepend-icon="mdi-account-cog"
+          >Trocar Senha</v-list-item
+        >
         <v-list-item @click="exit()" prepend-icon="mdi-logout"
           >Sair</v-list-item
         >
@@ -57,7 +62,7 @@
     </v-navigation-drawer>
 
     <header
-      v-if="path !== '/auth' && path !== '/change-password' && !isNotFound"
+      v-if="path !== '/auth' && path !== '/recover-password' && !isNotFound"
       class="container"
     >
       <v-app-bar-nav-icon

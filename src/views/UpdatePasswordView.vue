@@ -4,8 +4,10 @@ import Titulo from "@/components/Titulo.vue";
 import Autenticacao from "@/services/Autenticacao";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { usuarioStore } from "@/stores/usuarioStore";
 
 const router = useRouter();
+const { usuario } = usuarioStore();
 
 const state = ref({
   actualPassword: "",
@@ -36,8 +38,7 @@ async function onSubmit() {
     return;
   }
 
-  // buscar o id do usuário logado
-  const userId = 16;
+  const userId = usuario?.idUsuario ?? 0;
   state.value.errorMessage = undefined;
   state.value.error = false;
 
